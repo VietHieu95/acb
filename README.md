@@ -1,36 +1,76 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# ACB Eco-Tracker — Web Demo
 
-## Getting Started
+Demo mobile-first mô phỏng tính năng **ACB Eco-Tracker**: theo dõi dấu chân carbon từ giao dịch thẻ/QR (MCC + Input-Output Model), nhận diện merchant xanh, game **Khu rừng**, push túi vải và ưu đãi ESG.
 
-First, run the development server:
+> **Lưu ý:** Đây là prototype thuyết trình, không kết nối hệ thống ngân hàng thật. Số liệu carbon mang tính giáo dục.
+
+## Chạy local
 
 ```bash
+npm install
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Mở [http://localhost:3000](http://localhost:3000) — giao diện hiển thị khung điện thoại 390px.
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## Deploy Vercel
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+```bash
+npx vercel
+```
 
-## Learn More
+Hoặc import repo GitHub trên [vercel.com](https://vercel.com) → Framework: **Next.js** → Deploy.
 
-To learn more about Next.js, take a look at the following resources:
+## Quét QR & thanh toán (tương tác)
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+1. Tab **Quét QR** (nút giữa) hoặc **Quét QR thanh toán** trên Trang chủ.
+2. Cấp quyền **camera** → quét mã QR từ trang **Mã QR demo** (`/qr-codes`).
+3. Xác nhận thanh toán → giao dịch mới xuất hiện (nhãn **Mới**), số dư giảm, carbon cập nhật.
+4. Quét **Co.opmart** → popup hỏi túi vải.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+**Hai cách dùng mã QR:**
+- Trong app: mở `/qr-codes` (máy thứ 2 hoặc in màn hình).
+- File PNG in sẵn: chạy `npm run generate-qr` → thư mục `public/qr/*.png`.
 
-## Deploy on Vercel
+| Mã dịch vụ | Dịch vụ | Gợi ý carbon |
+|------------|---------|--------------|
+| `vinbus` | VinBus 7.000₫ | Xanh |
+| `xanhsm` | Xanh SM 125.000₫ | Xanh |
+| `train` | Tàu hỏa 890.000₫ | Xanh |
+| `coopmart` | Co.opmart 487.500₫ | Vàng + túi vải |
+| `bodyshop` | The Body Shop | Xanh |
+| `mango` | Mango Committed | Xanh |
+| `highlands` | Highlands Organic | Vàng |
+| `grab` | Grab | Đỏ |
+| `shell` | Shell xăng | Đỏ |
+| `vietnam-airlines` | Vietnam Airlines | Đỏ |
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+Payload QR: `ACBECO:v1|{mã}` (vd. `ACBECO:v1|vinbus`).
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Kịch bản pitch (~3 phút)
+
+1. **Trang chủ** — Số dư, CO₂ tháng, biểu đồ theo danh mục, widget Khu rừng.
+2. **Giao dịch** — So sánh VinBus/Xanh SM (xanh) với Shell/Vietnam Airlines (đỏ). Lọc Tất cả / Xanh / Đỏ.
+3. **Popup túi vải** — Xuất hiện khi vào app (giao dịch Co.opmart). Chọn **Có** → +50 điểm, −0,2 kg CO₂.
+4. **Khu rừng** — Xem cây theo điểm xanh; nếu 3+ giao dịch đỏ liên tiếp → cây héo (animation).
+5. **Ưu đãi** — Voucher ESG theo stage rừng; quyên góp trồng cây (demo UX).
+
+## Reset demo
+
+Giữ **logo ACB ONE** ở header ~3 giây → bấm **Reset demo** để xóa trạng thái `localStorage`.
+
+## Công thức (demo)
+
+```
+CO₂e (kg) = (Số tiền VNĐ / 1.000.000) × EF(MCC) × Hệ số merchant
+```
+
+- **EF:** hệ số phát thải theo ngành (MCC), ví dụ xăng 5541 cao, giao thông công cộng 4111 thấp.
+- **Merchant:** rule-based (VinBus, Xanh SM, tàu hỏa, thương hiệu bền vững…).
+
+## Cấu trúc chính
+
+- `lib/carbon/` — calculator, MCC factors, merchant rules
+- `lib/forest/score.ts` — điểm xanh, stage cây
+- `lib/mock/transactions.ts` — 18 giao dịch mẫu
+- `context/EcoProvider.tsx` — state + localStorage
