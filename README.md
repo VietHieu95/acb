@@ -65,8 +65,9 @@ Giữ **logo ACB ONE** ở header ~3 giây → bấm **Reset demo** để xóa t
 CO₂e (kg) = (Số tiền VNĐ / 1.000.000) × EF(MCC) × Hệ số merchant
 ```
 
-- **EF:** hệ số phát thải theo ngành (MCC), ví dụ xăng 5541 cao, giao thông công cộng 4111 thấp.
-- **Merchant:** rule-based (VinBus, Xanh SM, tàu hỏa, thương hiệu bền vững…).
+- **EF:** hệ số phát thải theo ngành (MCC), ví dụ xăng 5541 cao, giao thông công cộng 4111 thấp. Đây là hệ số minh họa cho prototype, không phải hệ số chính thức của ACB/Visa/Mastercard.
+- **Merchant:** rule-based (VinBus, Xanh SM, tàu hỏa, thương hiệu bền vững…). Lớp này giúp giảm hệ số cho merchant điện/bền vững khi MCC chung chưa đủ chi tiết.
+- Xem thêm nguồn và giới hạn phương pháp tại `docs/carbon-methodology.md`.
 
 ## Cấu trúc chính
 

@@ -16,30 +16,49 @@ export function AppHeader() {
   };
 
   return (
-    <header className="sticky top-0 z-20 bg-gradient-to-r from-[#0066B3] to-[#004d8c] px-4 pb-3 pt-10 text-white">
-      <div className="flex items-center justify-between">
+    <header className="relative bg-[#0878F8] px-5 pb-16 pt-7 text-white">
+      <div className="absolute inset-0 overflow-hidden">
+        <div className="absolute -right-16 top-12 h-56 w-56 rounded-full bg-white/10" />
+        <div className="absolute -bottom-24 left-8 h-72 w-72 rounded-[5rem] bg-white/10 rotate-45" />
+      </div>
+      <div className="relative flex items-start justify-between">
         <button
           type="button"
-          className="text-left"
+          className="flex items-center gap-3 text-left"
           onPointerDown={startHold}
           onPointerUp={cancelHold}
           onPointerLeave={cancelHold}
           onPointerCancel={cancelHold}
         >
-          <p className="text-xs font-medium opacity-80">ACB ONE</p>
-          <h1 className="text-lg font-bold tracking-tight">Eco-Tracker</h1>
+          <span className="flex h-12 w-12 items-center justify-center rounded-full bg-white/95 text-xl shadow-lg">
+            🌍
+          </span>
+          <span>
+            <span className="block text-xs text-white/80">Good morning</span>
+            <span className="block text-lg font-bold leading-tight">Bình An</span>
+          </span>
         </button>
-        <span className="rounded-full bg-white/20 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide">
-          Beta Demo
-        </span>
+        <div className="flex gap-2">
+          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20 text-lg backdrop-blur">
+            ✨
+          </span>
+          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-white/20 text-lg backdrop-blur">
+            🔔
+          </span>
+        </div>
+      </div>
+      <div className="relative mt-5">
+        <p className="text-sm text-white/85">Digital Bank</p>
+        <p className="mt-1 text-3xl font-black tracking-tight">ACB ONE</p>
+        <p className="mt-1 text-sm text-white/85">Tap once, Experience more!</p>
       </div>
       {showResetHint && (
         <button
           type="button"
           onClick={resetDemo}
-          className="mt-2 w-full rounded-lg bg-white/15 py-1.5 text-xs font-medium hover:bg-white/25"
+          className="relative mt-3 w-full rounded-xl bg-white/20 py-2 text-xs font-medium backdrop-blur hover:bg-white/25"
         >
-          ↺ Reset demo
+          Reset demo
         </button>
       )}
     </header>

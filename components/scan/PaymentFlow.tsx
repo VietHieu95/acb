@@ -11,7 +11,7 @@ import {
   getCarbonTier,
   getTierLabel,
 } from "@/lib/carbon/calculator";
-import { QR_MERCHANTS, type QrMerchant } from "@/lib/qr/merchants";
+import { type QrMerchant } from "@/lib/qr/merchants";
 import { QrScanner } from "./QrScanner";
 import { CarbonBadge } from "@/components/transactions/CarbonBadge";
 
@@ -44,10 +44,11 @@ export function PaymentFlow() {
     ? calculateCo2e(selected.amountVnd, selected.mcc, selected.merchant)
     : null;
   const previewTier = preview ? getCarbonTier(preview.co2eKg) : null;
+  const baseEf = selected && preview ? preview.co2eKg / (selected.amountVnd / 1_000_000) / preview.modifier : null;
 
   return (
     <div className="space-y-4 p-4 pb-8">
-      <div className="flex items-center justify-between">
+      <div className="flex items-start justify-between gap-3">
         <div>
           <h2 className="text-base font-bold text-slate-800">Quét QR thanh toán</h2>
           <p className="text-xs text-slate-500">
@@ -56,7 +57,7 @@ export function PaymentFlow() {
         </div>
         <Link
           href="/qr-codes"
-          className="rounded-lg bg-[#0066B3]/10 px-2 py-1 text-[10px] font-semibold text-[#0066B3]"
+          className="shrink-0 rounded-lg bg-[#0066B3]/10 px-2 py-1 text-[10px] font-semibold text-[#0066B3]"
         >
           Mã QR demo
         </Link>
@@ -66,33 +67,22 @@ export function PaymentFlow() {
         <>
           <QrScanner active onDetected={handleDetected} />
 
-          <section>
-            <p className="mb-2 text-xs font-semibold text-slate-600">
-              Hoặc chọn dịch vụ (không cần camera)
+          <section className="rounded-xl bg-white p-3 text-[11px] leading-relaxed text-slate-600 shadow-sm ring-1 ring-slate-100">
+            <p className="font-semibold text-slate-800">Luồng demo dùng camera thật</p>
+            <p className="mt-1">
+              Mở <strong>/qr-codes</strong> trên thiết bị khác, đưa mã vào khung quét,
+              rồi app sẽ tự lấy merchant, MCC và số tiền từ payload QR.
             </p>
-            <div className="grid grid-cols-2 gap-2">
-              {QR_MERCHANTS.map((m) => (
-                <button
-                  key={m.id}
-                  type="button"
-                  onClick={() => handleDetected(m)}
-                  className="rounded-xl bg-white p-3 text-left shadow-sm ring-1 ring-slate-100 active:scale-[0.98]"
-                >
-                  <span className="text-xl">{m.icon}</span>
-                  <p className="mt-1 line-clamp-2 text-[11px] font-semibold text-slate-800">
-                    {m.merchant}
-                  </p>
-                  <p className="text-[10px] text-slate-500">{formatVnd(m.amountVnd)}</p>
-                </button>
-              ))}
-            </div>
+            <p className="mt-2 rounded-lg bg-blue-50 p-2 text-blue-900">
+              Không có nút chọn dịch vụ thủ công để trải nghiệm giống thanh toán QR thực tế hơn.
+            </p>
           </section>
         </>
       )}
 
       {step === "confirm" && selected && preview && previewTier && (
         <section className="rounded-2xl bg-white p-4 shadow-lg ring-1 ring-slate-100">
-          <p className="text-xs font-medium text-slate-500">Xác nhận chuyển khoản</p>
+          <p className="text-xs font-medium text-slate-500">Xác nhận thanh toán QR</p>
           <p className="mt-1 text-lg font-bold text-slate-900">{selected.merchant}</p>
           <p className="mt-3 text-2xl font-bold text-[#0066B3]">
             {formatVnd(selected.amountVnd)}
@@ -106,7 +96,25 @@ export function PaymentFlow() {
             <span className="rounded-full bg-slate-100 px-2 py-0.5 text-[10px] text-slate-600">
               MCC {selected.mcc}
             </span>
+            {preview.tag && (
+              <span className="rounded-full bg-green-50 px-2 py-0.5 text-[10px] font-semibold text-green-800 ring-1 ring-green-100">
+                AI: {preview.tag}
+              </span>
+            )}
           </div>
+
+          <div className="mt-4 rounded-xl bg-slate-50 p-3 ring-1 ring-slate-100">
+            <p className="text-[11px] font-semibold text-slate-800">Cách app ước tính</p>
+            <p className="mt-1 font-mono text-[10px] text-slate-600">
+              {formatVnd(selected.amountVnd)} / 1.000.000 × {baseEf?.toFixed(1)} × {preview.modifier}
+              = {formatCo2(preview.co2eKg)}
+            </p>
+            <p className="mt-1 text-[10px] leading-relaxed text-slate-500">
+              EF theo MCC là baseline ngành; AI merchant giảm hệ số nếu nhận diện xe điện,
+              xe buýt điện, tàu hỏa hoặc thương hiệu bền vững.
+            </p>
+          </div>
+
           <p className="mt-2 text-[10px] text-slate-500">{selected.description}</p>
           {payError && (
             <p className="mt-2 rounded-lg bg-red-50 p-2 text-xs text-red-700">{payError}</p>
@@ -119,7 +127,7 @@ export function PaymentFlow() {
                 setSelected(null);
                 setPayError(null);
               }}
-              className="flex-1 rounded-xl bg-slate-100 py-3 text-sm font-semibold text-slate-700"
+              className="min-h-11 flex-1 rounded-xl bg-slate-100 py-3 text-sm font-semibold text-slate-700"
             >
               Hủy
             </button>
@@ -127,7 +135,7 @@ export function PaymentFlow() {
               type="button"
               onClick={handlePay}
               disabled={balance < selected.amountVnd}
-              className="flex-1 rounded-xl bg-[#0066B3] py-3 text-sm font-bold text-white disabled:opacity-50"
+              className="min-h-11 flex-1 rounded-xl bg-[#0066B3] py-3 text-sm font-bold text-white disabled:opacity-50"
             >
               Xác nhận trả
             </button>
@@ -136,27 +144,24 @@ export function PaymentFlow() {
       )}
 
       {step === "success" && selected && preview && previewTier && (
-        <section className="rounded-2xl bg-gradient-to-br from-green-50 to-white p-6 text-center shadow-lg ring-1 ring-green-200">
-          <span className="text-4xl">✓</span>
+        <section className="rounded-2xl bg-white p-5 text-center shadow-lg ring-1 ring-green-200">
+          <span className="text-4xl text-[#1B5E20]">✓</span>
           <h3 className="mt-2 text-lg font-bold text-[#1B5E20]">Thanh toán thành công</h3>
           <p className="mt-1 text-sm text-slate-600">{selected.merchant}</p>
           <p className="mt-2 text-xl font-bold">{formatVnd(selected.amountVnd)}</p>
           <p className="mt-3 text-sm text-slate-600">
-            Carbon ước tính:{" "}
-            <strong className={previewTier === "high" ? "text-red-600" : "text-green-700"}>
-              {formatCo2(preview.co2eKg)}
-            </strong>
+            Carbon ước tính: <strong className={previewTier === "high" ? "text-red-600" : "text-green-700"}>{formatCo2(preview.co2eKg)}</strong>
           </p>
           {selected.triggersBagPrompt && (
-            <p className="mt-2 text-xs text-[#0066B3]">
-              Sắp có câu hỏi về túi vải…
+            <p className="mt-2 rounded-lg bg-blue-50 p-2 text-xs text-[#0066B3]">
+              App sẽ hỏi bạn có dùng túi vải cá nhân không để điều chỉnh điểm xanh.
             </p>
           )}
           <div className="mt-4 flex flex-col gap-2">
             <button
               type="button"
               onClick={() => router.push("/transactions")}
-              className="rounded-xl bg-[#0066B3] py-3 text-sm font-bold text-white"
+              className="min-h-11 rounded-xl bg-[#0066B3] py-3 text-sm font-bold text-white"
             >
               Xem giao dịch
             </button>
@@ -166,7 +171,7 @@ export function PaymentFlow() {
                 setStep("scan");
                 setSelected(null);
               }}
-              className="rounded-xl bg-slate-100 py-2.5 text-sm font-medium text-slate-700"
+              className="min-h-11 rounded-xl bg-slate-100 py-2.5 text-sm font-medium text-slate-700"
             >
               Quét thêm
             </button>

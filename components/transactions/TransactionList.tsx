@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { useEco } from "@/context/EcoProvider";
-import { formatVnd } from "@/lib/carbon/calculator";
+import { formatCo2, formatVnd } from "@/lib/carbon/calculator";
 import { CarbonBadge } from "./CarbonBadge";
 
 const categoryIcons: Record<string, string> = {
@@ -40,7 +40,12 @@ export function TransactionList() {
       <div>
         <h2 className="text-base font-bold text-slate-800">Giao dịch tháng 5</h2>
         <p className="text-xs text-slate-500">
-          Carbon ước tính từ MCC + nhận diện merchant
+          Mỗi giao dịch có MCC, merchant và CO2e ước tính
+        </p>
+      </div>
+      <div className="rounded-xl bg-white p-3 text-[10px] leading-relaxed text-slate-500 shadow-sm ring-1 ring-slate-100">
+        <p>
+          <strong className="text-slate-700">Minh bạch:</strong> cùng MCC taxi nhưng Xanh SM được giảm hệ số nhờ AI nhận diện xe điện; Grab thường giữ baseline MCC. MCC xăng/hàng không giữ mức cao.
         </p>
       </div>
       <div className="flex gap-2">
@@ -49,7 +54,7 @@ export function TransactionList() {
             key={f.key}
             type="button"
             onClick={() => setFilter(f.key)}
-            className={`rounded-full px-3 py-1 text-xs font-medium transition-colors ${
+            className={`min-h-9 rounded-full px-3 py-1 text-xs font-medium transition-colors ${
               filter === f.key
                 ? "bg-[#0066B3] text-white"
                 : "bg-white text-slate-600 ring-1 ring-slate-200"
@@ -79,8 +84,7 @@ export function TransactionList() {
                   )}
                 </p>
                 <p className="text-xs text-slate-500">
-                  MCC {tx.mcc} ·{" "}
-                  {new Date(tx.date).toLocaleDateString("vi-VN", {
+                  MCC {tx.mcc} · modifier {tx.merchantModifier} · {new Date(tx.date).toLocaleDateString("vi-VN", {
                     day: "2-digit",
                     month: "2-digit",
                     hour: "2-digit",
@@ -89,7 +93,7 @@ export function TransactionList() {
                 </p>
                 {tx.merchantTag && (
                   <p className="mt-0.5 text-[10px] font-medium text-[#2E7D32]">
-                    ✓ AI: {tx.merchantTag}
+                    AI: {tx.merchantTag}
                   </p>
                 )}
                 <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
@@ -102,6 +106,9 @@ export function TransactionList() {
                     co2eKg={tx.co2eKg}
                   />
                 </div>
+                <p className="mt-1 text-[10px] text-slate-400">
+                  Điểm xanh: {tx.greenPoints > 0 ? "+" : ""}{tx.greenPoints} · CO2e {formatCo2(tx.co2eKg)}
+                </p>
               </div>
             </div>
           </li>

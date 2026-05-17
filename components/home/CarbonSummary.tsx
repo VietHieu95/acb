@@ -12,25 +12,36 @@ export function CarbonSummary() {
 
   return (
     <section className="mx-4 mt-4 rounded-2xl bg-white p-4 shadow-sm ring-1 ring-slate-100">
-      <div className="flex items-start justify-between">
+      <div className="flex items-start justify-between gap-3">
         <div>
-          <h3 className="text-sm font-bold text-slate-800">Dấu chân carbon</h3>
-          <p className="text-xs text-slate-500">Tháng 5/2026 · Input-Output Model</p>
+          <h3 className="text-sm font-bold text-slate-800">Dấu chân carbon tháng này</h3>
+          <p className="text-xs text-slate-500">Ước tính từ MCC + nhận diện merchant</p>
         </div>
-        <div className="text-right">
+        <div className="shrink-0 text-right">
           <p className="text-xl font-bold text-slate-900">{formatCo2(totalCo2)}</p>
-          <p className="text-[10px] text-slate-500">CO₂e</p>
+          <p className="text-[10px] text-slate-500">CO2e</p>
         </div>
       </div>
+
+      <div className="mt-3 rounded-xl bg-slate-50 p-3 ring-1 ring-slate-100">
+        <p className="text-[10px] font-semibold uppercase text-slate-500">Công thức demo</p>
+        <p className="mt-1 font-mono text-[10px] text-slate-700">
+          CO2e = (VNĐ / 1.000.000) × EF(MCC) × hệ số merchant
+        </p>
+        <p className="mt-1 text-[10px] leading-relaxed text-slate-500">
+          EF là baseline theo ngành; merchant xanh như VinBus/Xanh SM được AI điều chỉnh để không bị tính như taxi/xăng thông thường.
+        </p>
+      </div>
+
       {ecoState.bagBonusApplied && (
         <p className="mt-2 rounded-lg bg-green-50 px-2 py-1 text-[10px] text-green-800">
-          −0,2 kg nhờ túi vải tái sử dụng
+          -0,2 kg nhờ túi vải tái sử dụng
         </p>
       )}
       <div className="mt-4 space-y-2">
         {entries.map(([label, value], i) => (
           <div key={label}>
-            <div className="mb-1 flex justify-between text-[10px]">
+            <div className="mb-1 flex justify-between gap-2 text-[10px]">
               <span className="font-medium text-slate-600">{label}</span>
               <span className="text-slate-500">{formatCo2(value)}</span>
             </div>
@@ -46,6 +57,9 @@ export function CarbonSummary() {
           </div>
         ))}
       </div>
+      <p className="mt-3 text-[10px] leading-relaxed text-slate-400">
+        Prototype minh họa theo GHG Protocol Scope 3 / EEIO; không phải kết quả kiểm kê carbon chính thức.
+      </p>
     </section>
   );
 }
