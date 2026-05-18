@@ -11,6 +11,7 @@ import {
 } from "react";
 import { enrichAll, enrichTransaction } from "@/lib/carbon/calculator";
 import {
+  computeAvailableGreenPoints,
   computeGreenScore,
   getTreeStage,
   hasConsecutiveHighTier,
@@ -40,6 +41,7 @@ interface EcoContextValue {
   ecoState: EcoState;
   balance: number;
   greenScore: number;
+  availableGreenPoints: number;
   treeStage: TreeStage;
   totalCo2: number;
   categoryBreakdown: Record<string, number>;
@@ -97,12 +99,13 @@ export function EcoProvider({ children }: { children: ReactNode }) {
 
   const greenScore = useMemo(
     () =>
-      computeGreenScore(
-        transactions,
-        ecoState.bagBonusApplied,
-        ecoState.pointsSpentOnDonate,
-      ),
-    [transactions, ecoState.bagBonusApplied, ecoState.pointsSpentOnDonate],
+      computeGreenScore(transactions, ecoState.bagBonusApplied),
+    [transactions, ecoState.bagBonusApplied],
+  );
+
+  const availableGreenPoints = useMemo(
+    () => computeAvailableGreenPoints(greenScore, ecoState.pointsSpentOnDonate),
+    [greenScore, ecoState.pointsSpentOnDonate],
   );
 
   const treeStage = useMemo(() => getTreeStage(greenScore), [greenScore]);
@@ -186,6 +189,7 @@ export function EcoProvider({ children }: { children: ReactNode }) {
     ecoState,
     balance: ecoState.balance,
     greenScore,
+    availableGreenPoints,
     treeStage,
     totalCo2,
     categoryBreakdown,

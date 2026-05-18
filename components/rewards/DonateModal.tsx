@@ -15,13 +15,13 @@ export function DonateModal({
   open: boolean;
   onClose: () => void;
 }) {
-  const { greenScore, donatePoints } = useEco();
+  const { availableGreenPoints, donatePoints } = useEco();
   const [message, setMessage] = useState<string | null>(null);
 
   if (!open) return null;
 
   const handleDonate = (points: number, trees: number) => {
-    if (greenScore < points) {
+    if (availableGreenPoints < points) {
       setMessage("Không đủ điểm xanh!");
       return;
     }
@@ -43,7 +43,7 @@ export function DonateModal({
         </p>
         <p className="mt-2 text-sm">
           Điểm khả dụng:{" "}
-          <strong className="text-[#2E7D32]">{greenScore}</strong>
+          <strong className="text-[#2E7D32]">{availableGreenPoints}</strong>
         </p>
         {message && (
           <p className="mt-2 rounded-lg bg-green-50 p-2 text-center text-xs text-green-800">
@@ -55,7 +55,7 @@ export function DonateModal({
             <button
               key={opt.points}
               type="button"
-              disabled={greenScore < opt.points}
+              disabled={availableGreenPoints < opt.points}
               onClick={() => handleDonate(opt.points, opt.trees)}
               className="w-full rounded-xl border border-green-200 bg-green-50 py-3 text-sm font-semibold text-[#1B5E20] disabled:opacity-40 hover:bg-green-100"
             >

@@ -18,11 +18,17 @@ export function computeBaseGreenScore(transactions: EnrichedTransaction[]): numb
 export function computeGreenScore(
   transactions: EnrichedTransaction[],
   bagBonusApplied: boolean,
-  pointsSpentOnDonate: number,
 ): number {
   const base = computeBaseGreenScore(transactions);
   const bag = bagBonusApplied ? BAG_GREEN_POINTS : 0;
-  return Math.max(0, base + bag - pointsSpentOnDonate);
+  return Math.max(0, base + bag);
+}
+
+export function computeAvailableGreenPoints(
+  greenScore: number,
+  pointsSpentOnDonate: number,
+): number {
+  return Math.max(0, greenScore - pointsSpentOnDonate);
 }
 
 export function getTreeStage(score: number): TreeStage {

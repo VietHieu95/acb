@@ -7,16 +7,16 @@ import { RewardCard } from "./RewardCard";
 import { DonateModal } from "./DonateModal";
 
 export function RewardsView() {
-  const { greenScore, treeStage, ecoState } = useEco();
+  const { availableGreenPoints, greenScore, treeStage, ecoState } = useEco();
   const [donateOpen, setDonateOpen] = useState(false);
 
   return (
     <div className="space-y-4 p-4 pb-8">
       <section className="rounded-2xl bg-gradient-to-br from-[#0066B3] to-[#004d8c] p-4 text-white">
-        <p className="text-xs opacity-80">Điểm xanh tích lũy</p>
+        <p className="text-xs opacity-80">Điểm rừng tích lũy</p>
         <p className="text-3xl font-bold">{greenScore}</p>
         <p className="mt-1 text-xs opacity-90">
-          Rừng: {STAGE_LABELS[treeStage]} · {ecoState.donatedTrees} cây đã trồng
+          Khả dụng: {availableGreenPoints} · Rừng: {STAGE_LABELS[treeStage]} · {ecoState.donatedTrees} cây thật
         </p>
       </section>
 

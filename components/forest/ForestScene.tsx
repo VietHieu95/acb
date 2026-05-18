@@ -9,7 +9,7 @@ import {
 import { TreeVisual } from "./TreeVisual";
 
 export function ForestScene() {
-  const { greenScore, treeStage, isWilted, ecoState } = useEco();
+  const { availableGreenPoints, greenScore, treeStage, isWilted, ecoState } = useEco();
   const progress = getStageProgress(greenScore, treeStage);
   const nextThreshold =
     treeStage < 4 ? STAGE_THRESHOLDS[treeStage + 1] : null;
@@ -40,6 +40,9 @@ export function ForestScene() {
             style={{ width: `${progress}%` }}
           />
         </div>
+        <p className="mt-2 text-[10px] text-slate-500">
+          Điểm khả dụng để quyên góp: {availableGreenPoints}
+        </p>
         {nextThreshold !== null && treeStage < 4 && (
           <p className="mt-2 text-[10px] text-slate-500">
             Còn {nextThreshold - greenScore} điểm để lên{" "}
@@ -56,8 +59,7 @@ export function ForestScene() {
         </p>
         {ecoState.donatedTrees > 0 && (
           <p className="rounded-lg bg-green-50 p-3 text-green-800">
-            Bạn đã quyên góp trồng {ecoState.donatedTrees} cây thật qua dự án
-            cộng đồng ACB × GreenVN.
+            Bạn đã quyên góp trồng {ecoState.donatedTrees} cây thật. Rừng ảo vẫn giữ cấp độ đã tích lũy.
           </p>
         )}
       </div>
