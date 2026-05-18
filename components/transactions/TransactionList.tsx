@@ -45,7 +45,7 @@ export function TransactionList() {
       </div>
       <div className="rounded-xl bg-white p-3 text-[10px] leading-relaxed text-slate-500 shadow-sm ring-1 ring-slate-100">
         <p>
-          <strong className="text-slate-700">Minh bạch:</strong> cùng MCC taxi nhưng Xanh SM được giảm hệ số nhờ AI nhận diện xe điện; Grab thường giữ baseline MCC. MCC xăng/hàng không giữ mức cao.
+          <strong className="text-slate-700">Minh bạch:</strong> App chỉ tính CO2e cho giao dịch có dữ liệu hoạt động bảo vệ được như xăng, xe, bus, tàu, máy bay. Mua sắm/F&B/thời trang sẽ ghi chưa đủ dữ liệu.
         </p>
       </div>
       <div className="flex gap-2">
@@ -84,7 +84,7 @@ export function TransactionList() {
                   )}
                 </p>
                 <p className="text-xs text-slate-500">
-                  MCC {tx.mcc} · modifier {tx.merchantModifier} · {new Date(tx.date).toLocaleDateString("vi-VN", {
+                  MCC {tx.mcc} · {tx.carbonMethod} · {new Date(tx.date).toLocaleDateString("vi-VN", {
                     day: "2-digit",
                     month: "2-digit",
                     hour: "2-digit",
@@ -93,7 +93,7 @@ export function TransactionList() {
                 </p>
                 {tx.merchantTag && (
                   <p className="mt-0.5 text-[10px] font-medium text-[#2E7D32]">
-                    AI: {tx.merchantTag}
+                    Profile: {tx.merchantTag}
                   </p>
                 )}
                 <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
@@ -106,9 +106,12 @@ export function TransactionList() {
                     co2eKg={tx.co2eKg}
                   />
                 </div>
-                <p className="mt-1 text-[10px] text-slate-400">
-                  Điểm xanh: {tx.greenPoints > 0 ? "+" : ""}{tx.greenPoints} · CO2e {formatCo2(tx.co2eKg)}
-                </p>
+                <div className="mt-2 rounded-lg bg-slate-50 p-2 text-[10px] leading-relaxed text-slate-500">
+                  <p className="font-mono text-slate-600">{tx.carbonFormula}</p>
+                  <p className="mt-1">{tx.carbonAssumption}</p>
+                  <p className="mt-1 font-medium text-slate-600">{tx.carbonMethod === "not-estimated" ? "Lý do" : "Nguồn"}: {tx.carbonSource}</p>
+                  <p className="mt-1 text-slate-400">{tx.carbonConfidence === "not-rated" ? "Không ảnh hưởng điểm xanh" : `Độ tin cậy: ${tx.carbonConfidence} · Điểm xanh: ${tx.greenPoints > 0 ? "+" : ""}${tx.greenPoints}`}</p>
+                </div>
               </div>
             </div>
           </li>

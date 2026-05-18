@@ -1,4 +1,6 @@
-export type CarbonTier = "low" | "medium" | "high";
+import type { CarbonConfidence, CarbonMethod } from "./carbon/profiles";
+
+export type CarbonTier = "low" | "medium" | "high" | "unknown";
 
 export type SpendCategory =
   | "transport"
@@ -23,9 +25,14 @@ export interface EnrichedTransaction extends RawTransaction {
   co2eKg: number;
   tier: CarbonTier;
   tierLabel: string;
-  merchantModifier: number;
   merchantTag?: string;
   greenPoints: number;
+  carbonMethod: CarbonMethod;
+  carbonFormula: string;
+  carbonAssumption: string;
+  carbonSource: string;
+  carbonSourceRefs: string[];
+  carbonConfidence: CarbonConfidence;
 }
 
 export type TreeStage = 0 | 1 | 2 | 3 | 4;

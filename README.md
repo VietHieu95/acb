@@ -61,17 +61,20 @@ Giữ **logo ACB ONE** ở header ~3 giây → bấm **Reset demo** để xóa t
 
 ## Công thức (demo)
 
+Eco-Tracker dùng mô hình **activity-based có nguồn** cho demo:
+
 ```
-CO₂e (kg) = (Số tiền VNĐ / 1.000.000) × EF(MCC) × Hệ số merchant
+CO₂e = dữ liệu hoạt động × hệ số phát thải
 ```
 
-- **EF:** hệ số phát thải theo ngành (MCC), ví dụ xăng 5541 cao, giao thông công cộng 4111 thấp. Đây là hệ số minh họa cho prototype, không phải hệ số chính thức của ACB/Visa/Mastercard.
-- **Merchant:** rule-based (VinBus, Xanh SM, tàu hỏa, thương hiệu bền vững…). Lớp này giúp giảm hệ số cho merchant điện/bền vững khi MCC chung chưa đủ chi tiết.
-- Xem thêm nguồn và giới hạn phương pháp tại `docs/carbon-methodology.md`.
+- **MCC:** dùng để phân loại giao dịch (xăng, taxi, hàng không, bus, tàu). Không gọi MCC là nguồn phát thải chính thức.
+- **Có tính CO₂e:** xăng, máy bay, taxi/xe điện, bus, tàu vì có thể giải thích bằng lít xăng, km hoặc passenger-km.
+- **Không tính CO₂e:** siêu thị, F&B, thời trang/retail vì chỉ từ số tiền và MCC không biết sản phẩm cụ thể; app ghi “chưa đủ dữ liệu”.
+- Xem nguồn, giả định và bộ Q&A phản biện tại `docs/carbon-methodology.md`.
 
 ## Cấu trúc chính
 
-- `lib/carbon/` — calculator, MCC factors, merchant rules
+- `lib/carbon/` — hybrid carbon profiles, calculator, source assumptions
 - `lib/forest/score.ts` — điểm xanh, stage cây
 - `lib/mock/transactions.ts` — 18 giao dịch mẫu
 - `context/EcoProvider.tsx` — state + localStorage

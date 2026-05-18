@@ -41,10 +41,9 @@ export function PaymentFlow() {
   };
 
   const preview = selected
-    ? calculateCo2e(selected.amountVnd, selected.mcc, selected.merchant)
+    ? calculateCo2e(selected.amountVnd, selected.mcc, selected.merchant, selected.category)
     : null;
   const previewTier = preview ? getCarbonTier(preview.co2eKg) : null;
-  const baseEf = selected && preview ? preview.co2eKg / (selected.amountVnd / 1_000_000) / preview.modifier : null;
 
   return (
     <div className="space-y-4 p-4 pb-8">
@@ -98,20 +97,24 @@ export function PaymentFlow() {
             </span>
             {preview.tag && (
               <span className="rounded-full bg-green-50 px-2 py-0.5 text-[10px] font-semibold text-green-800 ring-1 ring-green-100">
-                AI: {preview.tag}
+                Profile: {preview.tag}
               </span>
             )}
+            <span className="rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-800 ring-1 ring-blue-100">
+              {preview.method}
+            </span>
           </div>
 
           <div className="mt-4 rounded-xl bg-slate-50 p-3 ring-1 ring-slate-100">
             <p className="text-[11px] font-semibold text-slate-800">Cách app ước tính</p>
             <p className="mt-1 font-mono text-[10px] text-slate-600">
-              {formatVnd(selected.amountVnd)} / 1.000.000 × {baseEf?.toFixed(1)} × {preview.modifier}
-              = {formatCo2(preview.co2eKg)}
+              {preview.formulaText} = {formatCo2(preview.co2eKg)}
             </p>
             <p className="mt-1 text-[10px] leading-relaxed text-slate-500">
-              EF theo MCC là baseline ngành; AI merchant giảm hệ số nếu nhận diện xe điện,
-              xe buýt điện, tàu hỏa hoặc thương hiệu bền vững.
+              {preview.assumptionText}
+            </p>
+            <p className="mt-2 rounded-lg bg-white px-2 py-1 text-[10px] font-medium text-slate-600 ring-1 ring-slate-100">
+              Nguồn: {preview.sourceLabel}
             </p>
           </div>
 
