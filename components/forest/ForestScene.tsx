@@ -11,8 +11,7 @@ import { TreeVisual } from "./TreeVisual";
 export function ForestScene() {
   const { availableGreenPoints, greenScore, treeStage, isWilted, ecoState } = useEco();
   const progress = getStageProgress(greenScore, treeStage);
-  const nextThreshold =
-    treeStage < 4 ? STAGE_THRESHOLDS[treeStage + 1] : null;
+  const nextThreshold = treeStage < 4 ? STAGE_THRESHOLDS[treeStage + 1] : null;
 
   return (
     <div className="flex flex-col items-center p-4">
@@ -31,7 +30,7 @@ export function ForestScene() {
 
       <div className="mt-6 w-full rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-100">
         <div className="flex justify-between text-sm">
-          <span className="font-medium text-slate-700">Điểm xanh</span>
+          <span className="font-medium text-slate-700">Điểm xanh tích lũy</span>
           <span className="font-bold text-[#2E7D32]">{greenScore}</span>
         </div>
         <div className="mt-2 h-3 overflow-hidden rounded-full bg-slate-100">
@@ -40,16 +39,63 @@ export function ForestScene() {
             style={{ width: `${progress}%` }}
           />
         </div>
-        <p className="mt-2 text-[10px] text-slate-500">
-          Điểm khả dụng để quyên góp: {availableGreenPoints}
-        </p>
-        {nextThreshold !== null && treeStage < 4 && (
-          <p className="mt-2 text-[10px] text-slate-500">
-            Còn {nextThreshold - greenScore} điểm để lên{" "}
-            {STAGE_LABELS[treeStage + 1]}
-          </p>
-        )}
+        <div className="mt-2 flex justify-between gap-2 text-[10px] text-slate-500">
+          <span>Điểm khả dụng để quyên góp: {availableGreenPoints}</span>
+          {nextThreshold !== null && treeStage < 4 ? (
+            <span>
+              Cần thêm {nextThreshold - greenScore} điểm
+            </span>
+          ) : (
+            <span>Đã đạt cấp cao nhất</span>
+          )}
+        </div>
       </div>
+
+      <section className="mt-4 w-full rounded-xl bg-white p-4 shadow-sm ring-1 ring-slate-100">
+        <div className="flex items-center justify-between gap-2">
+          <h2 className="text-sm font-bold text-slate-800">Lộ trình cấp rừng</h2>
+          <span className="rounded-full bg-green-50 px-2 py-0.5 text-[10px] font-semibold text-green-800">
+            Bạn đang ở: {STAGE_LABELS[treeStage]}
+          </span>
+        </div>
+        <div className="mt-3 space-y-2">
+          {STAGE_LABELS.map((label, index) => {
+            const threshold = STAGE_THRESHOLDS[index];
+            const completed = greenScore >= threshold;
+            const current = treeStage === index;
+            const needed = Math.max(0, threshold - greenScore);
+
+            return (
+              <div
+                key={label}
+                className={`flex items-center gap-3 rounded-xl border p-3 ${
+                  current
+                    ? "border-[#2E7D32] bg-green-50"
+                    : completed
+                      ? "border-green-100 bg-white"
+                      : "border-slate-100 bg-slate-50"
+                }`}
+              >
+                <span
+                  className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
+                    completed ? "bg-[#2E7D32] text-white" : "bg-slate-200 text-slate-500"
+                  }`}
+                >
+                  {completed ? "✓" : index + 1}
+                </span>
+                <div className="min-w-0 flex-1">
+                  <p className="text-sm font-semibold text-slate-800">{label}</p>
+                  <p className="text-[10px] text-slate-500">
+                    Mốc: {threshold} điểm
+                    {!completed && ` · Cần thêm ${needed} điểm`}
+                    {current && " · Cấp hiện tại"}
+                  </p>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </section>
 
       <div className="mt-4 w-full space-y-2 text-xs text-slate-600">
         <p className="rounded-lg bg-white/80 p-3 ring-1 ring-slate-100">
