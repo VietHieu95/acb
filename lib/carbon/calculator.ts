@@ -1,10 +1,9 @@
 import type { CarbonTier, EnrichedTransaction, RawTransaction } from "../types";
 import { resolveCarbonProfile } from "./profiles";
 
-export function getCarbonTier(co2eKg: number, estimated = true): CarbonTier {
-  if (!estimated) return "unknown";
-  if (co2eKg < 0.5) return "low";
-  if (co2eKg <= 2) return "medium";
+export function getCarbonTier(co2eKg: number): CarbonTier {
+  if (co2eKg < 10) return "low";
+  if (co2eKg < 50) return "medium";
   return "high";
 }
 
@@ -16,8 +15,6 @@ export function getTierLabel(tier: CarbonTier): string {
       return "Trung bình";
     case "high":
       return "Phát thải cao";
-    case "unknown":
-      return "Chưa đủ dữ liệu";
   }
 }
 
@@ -29,8 +26,6 @@ export function greenPointsFromTier(tier: CarbonTier): number {
       return 10;
     case "high":
       return -25;
-    case "unknown":
-      return 0;
   }
 }
 
@@ -45,7 +40,7 @@ export function calculateCo2e(
 
 export function enrichTransaction(tx: RawTransaction): EnrichedTransaction {
   const profile = calculateCo2e(tx.amountVnd, tx.mcc, tx.merchant, tx.category);
-  const tier = getCarbonTier(profile.co2eKg, profile.method !== "not-estimated");
+  const tier = getCarbonTier(profile.co2eKg);
 
   return {
     ...tx,

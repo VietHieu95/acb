@@ -45,7 +45,7 @@ export function TransactionList() {
       </div>
       <div className="rounded-xl bg-white p-3 text-[10px] leading-relaxed text-slate-500 shadow-sm ring-1 ring-slate-100">
         <p>
-          <strong className="text-slate-700">Minh bạch:</strong> App chỉ tính CO2e cho giao dịch có dữ liệu hoạt động bảo vệ được như xăng, xe, bus, tàu, máy bay. Mua sắm/F&B/thời trang sẽ ghi chưa đủ dữ liệu.
+          <strong className="text-slate-700">Minh bạch:</strong> Đây là điểm carbon giáo dục theo kg CO2e/1 triệu VND, dùng EPA/VN-adjusted factors để so sánh tương đối giữa các nhóm chi tiêu.
         </p>
       </div>
       <div className="flex gap-2">
@@ -109,8 +109,8 @@ export function TransactionList() {
                 <div className="mt-2 rounded-lg bg-slate-50 p-2 text-[10px] leading-relaxed text-slate-500">
                   <p className="font-mono text-slate-600">{tx.carbonFormula}</p>
                   <p className="mt-1">{tx.carbonAssumption}</p>
-                  <p className="mt-1 font-medium text-slate-600">{tx.carbonMethod === "not-estimated" ? "Lý do" : "Nguồn"}: {tx.carbonSource}</p>
-                  <p className="mt-1 text-slate-400">{tx.carbonConfidence === "not-rated" ? "Không ảnh hưởng điểm xanh" : `Độ tin cậy: ${tx.carbonConfidence} · Điểm xanh: ${tx.greenPoints > 0 ? "+" : ""}${tx.greenPoints}`}</p>
+                  <p className="mt-1 font-medium text-slate-600">Nguồn: {tx.carbonSource}</p>
+                  <p className="mt-1 text-slate-400">Độ tin cậy: {tx.carbonConfidence} · Điểm xanh: {tx.greenPoints > 0 ? "+" : ""}{tx.greenPoints}</p>
                 </div>
               </div>
             </div>

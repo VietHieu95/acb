@@ -1,6 +1,6 @@
 import type { CarbonConfidence, CarbonMethod } from "./carbon/profiles";
 
-export type CarbonTier = "low" | "medium" | "high" | "unknown";
+export type CarbonTier = "low" | "medium" | "high";
 
 export type SpendCategory =
   | "transport"

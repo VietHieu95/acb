@@ -97,7 +97,5 @@ export function tierColor(tier: CarbonTier): string {
       return "#F9A825";
     case "high":
       return "#D32F2F";
-    case "unknown":
-      return "#64748B";
   }
 }

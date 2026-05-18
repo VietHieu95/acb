@@ -15,7 +15,7 @@ export function CarbonSummary() {
       <div className="flex items-start justify-between gap-3">
         <div>
           <h3 className="text-sm font-bold text-slate-800">Dấu chân carbon tháng này</h3>
-          <p className="text-xs text-slate-500">Hybrid: MCC phân loại, profile có nguồn</p>
+          <p className="text-xs text-slate-500">Giáo dục: kg CO2e / 1 triệu VND</p>
         </div>
         <div className="shrink-0 text-right">
           <p className="text-xl font-bold text-slate-900">{formatCo2(totalCo2)}</p>
@@ -26,10 +26,10 @@ export function CarbonSummary() {
       <div className="mt-3 rounded-xl bg-slate-50 p-3 ring-1 ring-slate-100">
         <p className="text-[10px] font-semibold uppercase text-slate-500">Công thức demo</p>
         <p className="mt-1 font-mono text-[10px] text-slate-700">
-CO2e = activity data × EF
+CO2e = (VNĐ / 1.000.000) × EF giáo dục
         </p>
         <p className="mt-1 text-[10px] leading-relaxed text-slate-500">
-Chỉ tính khi có giả định hoạt động bảo vệ được: lít xăng, km chuyến đi, passenger-km. Mua sắm/F&B/thời trang sẽ ghi “chưa đủ dữ liệu”.
+EF dùng để so sánh tương đối lối sống: điện/xăng cao, bus/tàu thấp, shopping/F&B ở mức tham khảo.
         </p>
       </div>
 
@@ -58,7 +58,7 @@ Chỉ tính khi có giả định hoạt động bảo vệ được: lít xăng
         ))}
       </div>
       <p className="mt-3 text-[10px] leading-relaxed text-slate-400">
-Prototype chỉ tính các giao dịch có nguồn activity-based đủ chắc; không phải kiểm kê carbon chính thức.
+Hệ số mang tính tham khảo cho game hoá B2C, có thể chênh lệch ±30%, không phải kiểm kê carbon chính thức.
       </p>
     </section>
   );

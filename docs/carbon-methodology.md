@@ -1,114 +1,92 @@
 # Carbon methodology and teacher Q&A
 
-This project is a presentation prototype, not an official ACB carbon accounting product. To avoid weak assumptions, the current demo only calculates CO2e for transactions that can be defended with activity-based logic: fuel, taxi/ride-hailing, electric mobility, public transport, rail, and flights.
+This project is a B2C banking prototype for education and gamification, not an ISO 14064 / corporate carbon inventory. The purpose is to help customers compare spending categories and understand greener lifestyle choices.
 
 ## 1. Core explanation
 
-MCC is not an emission-factor database. MCC only tells the app what kind of merchant the transaction belongs to.
+MCC is not an emission-factor database. MCC only classifies the transaction category. Eco-Tracker then applies an educational emission factor by spending category:
 
 ```text
-MCC -> classify transaction type -> choose carbon profile -> calculate if activity data can be defended
+CO2e = (Transaction amount / 1,000,000 VND) x educational EF
 ```
 
-The demo uses:
+This is designed for relative comparison inside a banking app: spending 1 million VND on fuel should look worse than spending 1 million VND on bus/rail. The absolute kg number is an estimate and can differ from real life.
 
-```text
-CO2e = activity data x emission factor
-```
+## 2. Recommended EF table for the demo
 
-If a transaction does not contain enough defensible activity data, the app does not assign a CO2e number. It shows `Chưa đủ dữ liệu` instead.
+| MCC / category | Sector | EF used (kg CO2e / 1M VND) | Rationale | Confidence |
+|---|---|---:|---|---|
+| 4900 / electricity | Electricity bill | 300 | Vietnam grid EF approx. 0.6766 kg/kWh and 1M VND electricity approx. 440-500 kWh | Medium |
+| 5541 | Fuel / gasoline | 100 | EPA Motor Gasoline 8.78 kg CO2/gallon = 2.319 kg/liter; 1M VND / 23,000 VND/liter approx. 43.5 liters | High |
+| 3000-3299 / 4511 | Air travel | 38.5 | Educational benchmark from EPA/air-travel factor logic, kept for relative game scoring | Medium |
+| 5411 | Grocery / supermarket | 30 | Educational retail benchmark, not product-level footprint | Low |
+| 5812 / 5814 | Restaurant / F&B | 10.5 | Educational F&B benchmark, not menu-level footprint | Low |
+| 5691 / 5651 | Apparel / retail | 7.5 | Educational apparel benchmark, not item-level LCA | Low |
+| 4814 / 4899 | Telecom / internet | 5 | Low-carbon digital utility benchmark | Low |
+| 4111 / 4112 | Bus / rail | 3 | Low-carbon mobility benchmark; VinBus/rail are encouraged in gameplay | Medium |
+| Xanh SM / EV ride | Electric ride-hailing | 1-2 | EV kWh/km x Vietnam grid EF, low but not zero | Medium |
+| Grab/taxi ICE | Ride-hailing gasoline | ~15 | EPA passenger car 0.297 kg/mile = 0.185 kg/km plus fare/km assumption | Medium |
 
-## 2. What is calculated and what is not
+## 3. Source basis
 
-| Transaction type | Demo decision | Reason |
+| Source | What it supports | Presentation line |
 |---|---|---|
-| Fuel station | Calculate | Amount can estimate liters of gasoline. |
-| Flight | Calculate | Route distance can estimate passenger-km. |
-| Taxi / ride-hailing | Calculate | Demo can assume trip distance from fare. |
-| Electric taxi / bus | Calculate | Electricity use and grid EF can estimate indirect emissions. |
-| Rail | Calculate | Passenger-km factor is defensible. |
-| Grocery / supermarket | Do not calculate | Transaction does not reveal product mix, weight, packaging, logistics. |
-| F&B | Do not calculate | Transaction does not reveal food ingredients, portion size, waste, supply chain. |
-| Fashion / retail | Do not calculate | Transaction does not reveal product material, quantity, supplier data. |
+| EPA GHG Emission Factors Hub 2025 | Gasoline, passenger car, bus, rail, air factors | "EPA gives the base activity factors; we convert them into VND-based educational factors." |
+| Vietnam grid emission factor | Electricity and EV indirect emissions | "Vietnam electricity is carbon-intensive, so electricity bill has high EF." |
+| GHG Protocol Scope 3 Calculation Guidance | Allows choosing methods based on available data | "This is an estimate based on available transaction data, not a formal audit." |
+| Green SM / VinBus official websites | Merchant classification as electric/green transport | "Merchant name helps classify Xanh SM/VinBus as low-carbon mobility." |
+| IEA Global EV Outlook | EVs have no tailpipe emissions but depend on electricity mix | "EV is lower than gasoline, but not zero." |
 
-This is more conservative than forcing a spend-based EEIO number into every retail transaction.
+Important EPA figures from the uploaded workbook:
 
-## 3. Sources and role
+- Table 2: Motor Gasoline = **8.78 kg CO2/gallon** = **2.319 kg CO2/liter**.
+- Table 10: Passenger Car = **0.297 kg CO2/vehicle-mile** = **0.185 kg CO2/km**.
+- Table 10: Bus = **0.066 kg CO2/passenger-mile** = **0.041 kg CO2/passenger-km**.
+- Table 10: Intercity Rail National Average = **0.096 kg CO2/passenger-mile** = **0.060 kg CO2/passenger-km**.
+- Table 10: Air Travel Medium Haul = **0.129 kg CO2/passenger-mile** = **0.080 kg CO2/passenger-km**.
 
-| Source | Role in this prototype | What to say in presentation |
-|---|---|---|
-| GHG Protocol Scope 3 Calculation Guidance | Defends choosing calculation methods based on data quality. | "Em chỉ tính khi dữ liệu đủ bảo vệ; còn thiếu dữ liệu thì ghi chưa đủ dữ liệu." |
-| US EPA gasoline factor | Supports gasoline combustion around 8.89 kg CO2/gallon = about 2.35 kg CO2/liter. | "MCC 5541 chỉ nhận diện trạm xăng; EF xăng lấy từ EPA/IPCC, không lấy từ MCC." |
-| UK Government GHG Conversion Factors | Activity factors for taxi/car, bus, rail, and air travel. | "Giao thông dùng hệ số theo km/passenger-km." |
-| ICAO Carbon Emissions Calculator | Supports flight-emission methodology. | "Vé máy bay tính theo khoảng cách route/passenger-km." |
-| Green SM official website | Confirms Xanh SM is pure-electric mobility. | "Nguồn này dùng để phân loại merchant là xe điện." |
-| VinBus official website | Confirms VinBus positioning as green/electric public transport. | "VinBus được classify là xe buýt điện." |
-| IEA Global EV Outlook | Explains EVs reduce tailpipe emissions but lifecycle depends on grid electricity. | "Xe điện không bằng 0 vì còn phát thải gián tiếp từ điện lưới." |
+## 4. Why this is acceptable for ACB Eco-Tracker
 
-Useful links:
+The product goal is not exact carbon accounting. It is to make invisible emissions visible enough for retail customers to compare choices:
 
-- GHG Protocol Scope 3 Calculation Guidance: https://ghgprotocol.org/scope-3-calculation-guidance-2
-- US EPA Greenhouse Gas Equivalencies / gasoline factor: https://www.epa.gov/energy/greenhouse-gases-equivalencies-calculator-calculations-and-references
-- UK Government GHG Conversion Factors: https://www.gov.uk/government/collections/government-conversion-factors-for-company-reporting
-- ICAO Carbon Emissions Calculator: https://www.icao.int/environmental-protection/Carbonoffset/Pages/default.aspx
-- Green SM: https://www.greensm.com/vn-vi
-- VinBus: https://vinbus.vn/
-- IEA Global EV Outlook: https://www.iea.org/reports/global-ev-outlook-2024
+- Bus/rail and EV rides should reward the forest.
+- Fuel, electricity, and flights should pressure the carbon budget.
+- Grocery/F&B/apparel remain approximate education signals, not product-level claims.
 
-## 4. Demo profiles
+A fair product disclaimer is:
 
-| Profile | Formula used in demo | Assumption | Source basis | Confidence |
-|---|---|---|---|---|
-| Fuel | liters x kg CO2/liter | Amount / 23,000 VND per liter | EPA/IPCC gasoline combustion | High |
-| Vietnam Airlines | passenger-km x kg CO2e/pkm | SGN-HAN approx. 1,160 km | ICAO / UK GHG Factors | Medium |
-| Xanh SM | km x kWh/km x Vietnam grid EF | 8-14 km trip, EV energy use 0.16 kWh/km, grid EF 0.66 kg/kWh | Green SM / IEA / grid EF assumption | Medium |
-| VinBus | passenger-km x bus factor x EV adjustment | 6 km urban bus trip | VinBus / UK GHG Factors / IEA | Medium |
-| Rail | passenger-km x rail factor | 320 km rail trip | UK GHG Factors | Medium |
-| Grab/taxi | km x taxi/car factor | 8-10 km ride-hailing trip | UK GHG Factors | Medium |
-| Grocery/F&B/fashion | Not estimated | Missing product/activity data | Data quality limitation | Not rated |
+> Hệ số phát thải mang tính tham khảo, dựa trên EPA GHG Emission Factors Hub 2025 và hệ số điện lưới Việt Nam. Kết quả dùng cho giáo dục/game hoá, không phải kiểm kê carbon chính thức; sai số có thể khoảng ±30% hoặc cao hơn với mua sắm/F&B/thời trang.
 
-## 5. MCC mapping
-
-| MCC | Meaning in demo | Carbon decision |
-|---|---|---|
-| 3000-3299 | Airlines | Calculate with flight profile. |
-| 4111 / 4131 | Public transport / bus / rail-like services | Calculate if merchant matches VinBus/rail profile. |
-| 4121 | Taxi / ride-hailing | Xanh SM electric profile if merchant matches; otherwise taxi/car profile. |
-| 5411 | Grocery / supermarket | Do not calculate CO2e in demo. |
-| 5541 / 5542 | Fuel station | Calculate with fuel liters profile. |
-| 5691 | Apparel / fashion retail | Do not calculate CO2e in demo. |
-| 5812 / 5814 | Restaurant / F&B | Do not calculate CO2e in demo. |
-
-## 6. Teacher Q&A
+## 5. Teacher Q&A
 
 ### Q1. EF lấy từ đâu?
 
-MCC không phải nguồn EF. MCC chỉ giúp phân loại giao dịch. EF lấy từ nguồn phát thải theo hoạt động: xăng dùng EPA/IPCC theo lít, giao thông dùng UK GHG Conversion Factors theo km/passenger-km, máy bay dùng ICAO/UK theo route/passenger-km.
+MCC không phải nguồn EF. MCC chỉ phân loại ngành. EF lấy từ EPA GHG Emission Factors Hub 2025, hệ số điện lưới Việt Nam, và một số benchmark giáo dục cho nhóm bán lẻ/F&B.
 
-### Q2. Vì sao bỏ siêu thị, F&B, thời trang?
+### Q2. Vì sao dùng kg/triệu VND thay vì tính từng sản phẩm?
 
-Vì chỉ nhìn số tiền và MCC không biết người dùng mua gì, số lượng bao nhiêu, nguyên liệu gì, vận chuyển ra sao. Nếu gán hệ số spend-based sẽ dễ bị hỏi nguồn và độ chính xác. Demo chọn cách bảo thủ: ghi `Chưa đủ dữ liệu`, không cộng CO2e và không ảnh hưởng điểm xanh.
+Vì app ngân hàng chỉ có dữ liệu giao dịch: số tiền, merchant, MCC. Khách hàng B2C cần tín hiệu tương đối để thay đổi hành vi, không cần carbon audit từng SKU. Nếu có dữ liệu sản phẩm trong tương lai thì có thể nâng cấp.
 
-### Q3. Xanh SM là xe điện sao vẫn có phát thải?
+### Q3. Xăng 100 kg/triệu lấy ở đâu?
 
-Xe điện không có phát thải tại ống xả, nhưng điện sạc xe vẫn có phát thải gián tiếp từ lưới điện. Vì vậy Xanh SM thấp hơn Grab/xăng, nhưng không bằng 0.
+EPA cho Motor Gasoline = 8.78 kg CO2/gallon = 2.319 kg/liter. Với giá xăng demo 23,000 VND/liter, 1 triệu VND mua khoảng 43.5 lít, phát thải khoảng 101 kg CO2.
 
-### Q4. MCC có đủ để tính chính xác carbon không?
+### Q4. Điện 300 kg/triệu có cao quá không?
 
-Không đủ. MCC chỉ là điểm bắt đầu. Muốn chính xác hơn cần dữ liệu bổ sung như số km, số lít xăng, điện năng tiêu thụ, loại phương tiện, hoặc dữ liệu verified từ merchant.
+Không. Với hệ số điện lưới Việt Nam khoảng 0.6766 kg/kWh và 1 triệu VND mua khoảng 440-500 kWh điện, phát thải khoảng 300-338 kg CO2e. Dùng 300 là bảo thủ.
 
-### Q5. Nếu muốn tính siêu thị/F&B/thời trang trong sản phẩm thật thì làm sao?
+### Q5. Vì sao Xanh SM không bằng 0?
 
-Cần dữ liệu cấp sản phẩm hoặc merchant disclosure: SKU, danh mục hàng, trọng lượng, thành phần, bao bì, logistics, hoặc database LCA/EEIO đã được hiệu chuẩn theo Việt Nam. Khi chưa có, app chỉ nên ghi nhận giao dịch và khuyến nghị bổ sung dữ liệu.
+Xe điện không phát thải tại ống xả, nhưng điện sạc vẫn có phát thải từ lưới điện. Vì vậy Xanh SM thấp hơn Grab/xăng nhưng không bằng 0.
 
-### Q6. Vì sao hàng không cao hơn tàu?
+### Q6. Siêu thị/F&B/thời trang có chính xác không?
 
-Vì tính theo passenger-km, flight factor thường cao hơn rail factor. App dùng khoảng cách route để phản ánh khác biệt này thay vì chỉ nhìn giá vé.
+Không chính xác đến từng sản phẩm. Đây là benchmark giáo dục theo chi tiêu. App nên ghi rõ là tham khảo; sản phẩm thật cần SKU, trọng lượng, thành phần, bao bì, logistics hoặc dữ liệu merchant.
 
-### Q7. Nếu giá xăng thay đổi thì sao?
+### Q7. Nếu thầy hỏi đây có phải carbon audit không?
 
-Trong demo, giá xăng là giả định để suy ra số lít từ số tiền. Sản phẩm thật nên lấy giá nhiên liệu thực tế theo thời điểm hoặc dữ liệu trực tiếp từ merchant/fuel receipt.
+Không. Đây là consumer-facing estimate cho giáo dục và game hoá. App không phục vụ báo cáo ISO 14064 hay báo cáo ESG doanh nghiệp.
 
-## 7. One-minute defense script
+## 6. One-minute defense script
 
-"Eco-Tracker không lấy MCC làm nguồn phát thải. MCC chỉ giúp phân loại giao dịch. Với các giao dịch có thể bảo vệ bằng dữ liệu hoạt động như xăng, taxi, xe điện, bus, tàu, máy bay, app dùng hệ số từ EPA/IPCC, UK GHG Factors, ICAO và IEA. Với siêu thị, F&B, thời trang, dữ liệu ngân hàng không biết sản phẩm cụ thể nên app không gán CO2e trong demo. Cách này bảo thủ hơn nhưng minh bạch và tránh suy diễn quá mức."
+"Eco-Tracker dùng MCC để phân loại giao dịch, rồi gán hệ số phát thải tham khảo theo 1 triệu VND để giáo dục người dùng. Các hệ số quan trọng như xăng và xe lấy từ EPA GHG Emission Factors Hub 2025; điện hiệu chỉnh theo hệ số điện lưới Việt Nam; Xanh SM/VinBus được nhận diện bằng tên merchant. Mục tiêu không phải kiểm kê carbon chính xác, mà là giúp khách hàng thấy chi tiêu nào tương đối xanh hơn và game hoá hành vi tiêu dùng bền vững."

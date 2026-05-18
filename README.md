@@ -61,15 +61,16 @@ Giữ **logo ACB ONE** ở header ~3 giây → bấm **Reset demo** để xóa t
 
 ## Công thức (demo)
 
-Eco-Tracker dùng mô hình **activity-based có nguồn** cho demo:
+Eco-Tracker dùng mô hình **EF tham khảo theo 1 triệu VND** cho mục tiêu giáo dục + game hoá B2C:
 
 ```
-CO₂e = dữ liệu hoạt động × hệ số phát thải
+CO₂e = (Số tiền VNĐ / 1.000.000) × EF giáo dục của ngành
 ```
 
-- **MCC:** dùng để phân loại giao dịch (xăng, taxi, hàng không, bus, tàu). Không gọi MCC là nguồn phát thải chính thức.
-- **Có tính CO₂e:** xăng, máy bay, taxi/xe điện, bus, tàu vì có thể giải thích bằng lít xăng, km hoặc passenger-km.
-- **Không tính CO₂e:** siêu thị, F&B, thời trang/retail vì chỉ từ số tiền và MCC không biết sản phẩm cụ thể; app ghi “chưa đủ dữ liệu”.
+- **MCC:** dùng để phân loại ngành chi tiêu, không phải nguồn phát thải chính thức.
+- **EF:** ưu tiên EPA GHG Emission Factors Hub 2025; hiệu chỉnh Việt Nam cho điện và xăng bằng giá điện/xăng + hệ số điện lưới/nhiên liệu.
+- **Mục tiêu:** so sánh tương đối hành vi chi tiêu (điện/xăng cao, bus/tàu thấp), không phải kiểm kê carbon chính thức.
+- **Sai số:** hiển thị như ước tính tham khảo, có thể chênh lệch khoảng ±30%.
 - Xem nguồn, giả định và bộ Q&A phản biện tại `docs/carbon-methodology.md`.
 
 ## Cấu trúc chính
