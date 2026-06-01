@@ -50,8 +50,9 @@ function includesAny(value: string, keywords: string[]): boolean {
   return keywords.some((keyword) => normalized.includes(keyword));
 }
 
-function roundKg(value: number): number {
-  return Math.max(0.001, Math.round(value * 1000) / 1000);
+/** Cắt nhiễu dấu phẩy động (IEEE) nhưng KHÔNG làm tròn số liệu: giữ tối đa 6 chữ số thập phân thực. */
+function trimNum(value: number, maxDecimals = 6): string {
+  return parseFloat(value.toFixed(maxDecimals)).toString();
 }
 
 function amountMillions(amountVnd: number): number {
@@ -61,7 +62,10 @@ function amountMillions(amountVnd: number): number {
 function profile(input: Omit<CarbonProfile, "co2eKg"> & { amountVnd: number }): CarbonProfile {
   return {
     ...input,
-    co2eKg: roundKg(amountMillions(input.amountVnd) * input.intensityKgPerMillionVnd),
+    // Giữ giá trị thực: số tiền (triệu VND) × hệ số EF, chỉ cắt nhiễu float ở 6 chữ số.
+    co2eKg: parseFloat(
+      (amountMillions(input.amountVnd) * input.intensityKgPerMillionVnd).toFixed(6),
+    ),
   };
 }
 
@@ -90,7 +94,7 @@ function spendProfile({
     tag,
     amountVnd,
     intensityKgPerMillionVnd: intensity,
-    formulaText: `${amountMillions(amountVnd).toFixed(2)} triệu VND × ${intensity} kg CO2e/triệu VND`,
+    formulaText: `${trimNum(amountMillions(amountVnd))} triệu VND × ${intensity} kg CO2e/triệu VND`,
     assumptionText,
     sourceLabel,
     sourceRefs,

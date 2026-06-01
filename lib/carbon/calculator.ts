@@ -62,9 +62,14 @@ export function enrichAll(transactions: RawTransaction[]): EnrichedTransaction[]
   return transactions.map(enrichTransaction);
 }
 
+/** Cắt nhiễu dấu phẩy động (IEEE) nhưng KHÔNG làm tròn: giữ tối đa 6 chữ số thập phân thực. */
+function trimNum(value: number, maxDecimals = 6): string {
+  return parseFloat(value.toFixed(maxDecimals)).toString();
+}
+
 export function formatCo2(kg: number): string {
-  if (kg < 1) return `${(kg * 1000).toFixed(0)} g`;
-  return `${kg.toFixed(2)} kg`;
+  if (kg < 1) return `${trimNum(kg * 1000)} g`;
+  return `${trimNum(kg)} kg`;
 }
 
 export function formatVnd(amount: number): string {
