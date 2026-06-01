@@ -14,6 +14,7 @@ import {
 import { type QrMerchant } from "@/lib/qr/merchants";
 import { QrScanner } from "./QrScanner";
 import { CarbonBadge } from "@/components/transactions/CarbonBadge";
+import { Icon } from "@/components/ui/Icon";
 
 type Step = "scan" | "confirm" | "success";
 
@@ -148,8 +149,10 @@ export function PaymentFlow() {
 
       {step === "success" && selected && preview && previewTier && (
         <section className="rounded-2xl bg-white p-5 text-center shadow-lg ring-1 ring-green-200">
-          <span className="text-4xl text-[#1B5E20]">✓</span>
-          <h3 className="mt-2 text-lg font-bold text-[#1B5E20]">Thanh toán thành công</h3>
+          <span className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-green-100 text-acb-green-dark">
+            <Icon name="check" className="h-7 w-7" />
+          </span>
+          <h3 className="mt-2 text-lg font-bold text-acb-green-dark">Thanh toán thành công</h3>
           <p className="mt-1 text-sm text-slate-600">{selected.merchant}</p>
           <p className="mt-2 text-xl font-bold">{formatVnd(selected.amountVnd)}</p>
           <p className="mt-3 text-sm text-slate-600">

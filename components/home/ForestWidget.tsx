@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useEco } from "@/context/EcoProvider";
 import { STAGE_LABELS } from "@/lib/forest/score";
 import { TreeVisual } from "@/components/forest/TreeVisual";
+import { Icon } from "@/components/ui/Icon";
 
 export function ForestWidget() {
   const { greenScore, treeStage, isWilted } = useEco();
@@ -18,8 +19,10 @@ export function ForestWidget() {
         >
           <div className="flex items-start justify-between gap-2">
             <div>
-              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-50 text-xl">🌳</span>
-              <p className="mt-2 text-sm font-bold leading-tight text-slate-800">Eco Forest</p>
+              <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-green-50 text-acb-green">
+                <Icon name="tree" className="h-5 w-5" />
+              </span>
+              <p className="mt-2 text-sm font-bold leading-tight text-slate-800">Khu rừng xanh</p>
               <p className="mt-1 text-[10px] leading-tight text-slate-500">
                 {STAGE_LABELS[treeStage]} · {greenScore} điểm
               </p>
@@ -31,13 +34,15 @@ export function ForestWidget() {
           href="/transactions"
           className="rounded-2xl border border-slate-100 bg-white p-3 shadow-sm active:scale-[0.99]"
         >
-          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-blue-50 text-xl">🌍</span>
+          <span className="flex h-10 w-10 items-center justify-center rounded-xl bg-acb-tint text-acb">
+            <Icon name="leaf" className="h-5 w-5" />
+          </span>
           <p className="mt-2 text-sm font-bold leading-tight text-slate-800">Eco-Tracker</p>
           <p className="mt-1 text-[10px] leading-tight text-slate-500">
             MCC + AI merchant để ước tính CO2e
           </p>
-          <span className="mt-2 inline-flex rounded-full bg-[#C8F56A] px-2 py-0.5 text-[9px] font-bold text-[#154500]">
-            New
+          <span className="mt-2 inline-flex rounded-full bg-acb-lime px-2 py-0.5 text-[9px] font-bold text-acb-green-dark">
+            Mới
           </span>
         </Link>
       </div>

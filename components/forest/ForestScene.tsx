@@ -7,6 +7,7 @@ import {
   getStageProgress,
 } from "@/lib/forest/score";
 import { TreeVisual } from "./TreeVisual";
+import { Icon } from "@/components/ui/Icon";
 
 export function ForestScene() {
   const { availableGreenPoints, greenScore, treeStage, isWilted, ecoState } = useEco();
@@ -78,10 +79,10 @@ export function ForestScene() {
               >
                 <span
                   className={`flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-xs font-bold ${
-                    completed ? "bg-[#2E7D32] text-white" : "bg-slate-200 text-slate-500"
+                    completed ? "bg-acb-green text-white" : "bg-slate-200 text-slate-500"
                   }`}
                 >
-                  {completed ? "✓" : index + 1}
+                  {completed ? <Icon name="check" className="h-4 w-4" /> : index + 1}
                 </span>
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-semibold text-slate-800">{label}</p>

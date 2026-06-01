@@ -3,16 +3,22 @@
 import Link from "next/link";
 import { useEco } from "@/context/EcoProvider";
 import { formatVnd } from "@/lib/carbon/calculator";
+import { Icon, type IconName } from "@/components/ui/Icon";
 
-const quickActions = [
-  { label: "Accounts", icon: "🏦" },
-  { label: "Cards", icon: "💳" },
-  { label: "Savings", icon: "🐷" },
-  { label: "Loans", icon: "💵" },
-  { label: "Payment", icon: "👛", href: "/scan", badge: "QR" },
-  { label: "Investment", icon: "📈" },
-  { label: "Insurance", icon: "🛡️" },
-  { label: "Asset", icon: "🏘️", badge: "New" },
+const quickActions: {
+  label: string;
+  icon: IconName;
+  href?: string;
+  badge?: string;
+}[] = [
+  { label: "Tài khoản", icon: "account" },
+  { label: "Thẻ", icon: "card" },
+  { label: "Tiết kiệm", icon: "savings" },
+  { label: "Vay vốn", icon: "loan" },
+  { label: "Thanh toán", icon: "wallet", href: "/scan", badge: "QR" },
+  { label: "Đầu tư", icon: "investment" },
+  { label: "Bảo hiểm", icon: "insurance" },
+  { label: "Tài sản", icon: "asset", badge: "Mới" },
 ];
 
 export function BalanceCard() {
@@ -22,16 +28,18 @@ export function BalanceCard() {
     <section className="mx-4 rounded-[1.4rem] bg-white p-4 shadow-xl shadow-slate-200/80 ring-1 ring-slate-100">
       <div className="grid grid-cols-[1fr_116px] gap-3">
         <div className="min-w-0 rounded-2xl bg-white p-2">
-          <p className="text-xs text-slate-500">Available balance</p>
-          <p className="mt-1 truncate text-[22px] font-bold tracking-tight text-[#0878F8]">
+          <p className="text-xs text-slate-500">Số dư khả dụng</p>
+          <p className="mt-1 truncate text-[22px] font-bold tracking-tight text-acb">
             {formatVnd(balance)}
           </p>
-          <p className="mt-1 text-[10px] text-slate-400">Payment account · **** 8842</p>
+          <p className="mt-1 text-[10px] text-slate-400">
+            Tài khoản thanh toán · **** 8842
+          </p>
         </div>
-        <div className="rounded-2xl bg-[#F5F8FF] p-3">
-          <p className="text-[11px] text-slate-500">ACB Rewards</p>
-          <p className="mt-1 text-xl font-bold text-[#0878F8]">{greenScore}</p>
-          <p className="text-[10px] text-slate-500">green points</p>
+        <div className="rounded-2xl bg-acb-tint p-3">
+          <p className="text-[11px] text-slate-500">Điểm thưởng</p>
+          <p className="mt-1 text-xl font-bold text-acb">{greenScore}</p>
+          <p className="text-[10px] text-slate-500">điểm xanh</p>
         </div>
       </div>
 
@@ -39,9 +47,11 @@ export function BalanceCard() {
         href="/scan"
         className="mt-4 flex items-center gap-3 rounded-2xl border border-slate-100 bg-white px-3 py-3 text-left shadow-sm active:scale-[0.99]"
       >
-        <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#EAF4FF] text-2xl">✅</span>
+        <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-acb-tint text-acb-green">
+          <Icon name="leaf" className="h-6 w-6" />
+        </span>
         <span className="min-w-0 flex-1 text-sm font-semibold leading-snug text-slate-700">
-Pay by QR and track carbon instantly
+          Thanh toán QR và đo carbon tức thì
         </span>
       </Link>
 
@@ -49,10 +59,10 @@ Pay by QR and track carbon instantly
         {quickActions.map((action) => {
           const content = (
             <>
-              <span className="relative flex h-14 w-14 items-center justify-center rounded-full bg-[#F2F7FF] text-2xl text-[#0878F8]">
-                {action.icon}
+              <span className="relative flex h-14 w-14 items-center justify-center rounded-full bg-acb-tint text-acb">
+                <Icon name={action.icon} className="h-6 w-6" />
                 {action.badge && (
-                  <span className="absolute -right-1 -top-1 rounded-full bg-[#C8F56A] px-1.5 py-0.5 text-[9px] font-bold text-[#154500]">
+                  <span className="absolute -right-1 -top-1 rounded-full bg-acb-lime px-1.5 py-0.5 text-[9px] font-bold text-acb-green-dark">
                     {action.badge}
                   </span>
                 )}
@@ -65,7 +75,11 @@ Pay by QR and track carbon instantly
 
           if (action.href) {
             return (
-              <Link key={action.label} href={action.href} className="flex flex-col items-center">
+              <Link
+                key={action.label}
+                href={action.href}
+                className="flex flex-col items-center"
+              >
                 {content}
               </Link>
             );

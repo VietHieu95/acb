@@ -1,3 +1,5 @@
+import { Icon } from "@/components/ui/Icon";
+
 export function RewardCard({
   title,
   description,
@@ -33,8 +35,9 @@ export function RewardCard({
       </div>
       <p className="mt-1 text-xs text-slate-600">{description}</p>
       {!unlocked && (
-        <p className="mt-2 text-[10px] font-medium text-slate-400">
-          🔒 Mở khóa khi đạt mức rừng yêu cầu
+        <p className="mt-2 flex items-center gap-1 text-[10px] font-medium text-slate-400">
+          <Icon name="lock" className="h-3.5 w-3.5" />
+          Mở khóa khi đạt mức rừng yêu cầu
         </p>
       )}
     </article>

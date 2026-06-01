@@ -2,16 +2,17 @@
 
 import { useMemo, useState } from "react";
 import { useEco } from "@/context/EcoProvider";
-import { formatCo2, formatVnd } from "@/lib/carbon/calculator";
+import { formatVnd } from "@/lib/carbon/calculator";
 import { CarbonBadge } from "./CarbonBadge";
+import { Icon, type IconName } from "@/components/ui/Icon";
 
-const categoryIcons: Record<string, string> = {
-  transport: "🚌",
-  food: "🍽️",
-  shopping: "🛒",
-  travel: "✈️",
-  utilities: "⚡",
-  other: "📦",
+const categoryIcons: Record<string, IconName> = {
+  transport: "transport",
+  food: "food",
+  shopping: "shopping",
+  travel: "travel",
+  utilities: "utilities",
+  other: "box",
 };
 
 type Filter = "all" | "low" | "high";
@@ -56,7 +57,7 @@ export function TransactionList() {
             onClick={() => setFilter(f.key)}
             className={`min-h-9 rounded-full px-3 py-1 text-xs font-medium transition-colors ${
               filter === f.key
-                ? "bg-[#0066B3] text-white"
+                ? "bg-acb text-white"
                 : "bg-white text-slate-600 ring-1 ring-slate-200"
             }`}
           >
@@ -71,14 +72,14 @@ export function TransactionList() {
             className="rounded-xl bg-white p-3 shadow-sm ring-1 ring-slate-100"
           >
             <div className="flex items-start gap-3">
-              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-slate-100 text-lg">
-                {categoryIcons[tx.category] ?? "📦"}
+              <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-acb-tint text-acb">
+                <Icon name={categoryIcons[tx.category] ?? "box"} className="h-5 w-5" />
               </span>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-semibold text-slate-800">
                   {tx.merchant}
                   {tx.id.startsWith("user-") && (
-                    <span className="ml-1 rounded bg-[#0066B3]/10 px-1 py-0.5 text-[9px] font-bold text-[#0066B3]">
+                    <span className="ml-1 rounded bg-acb/10 px-1 py-0.5 text-[9px] font-bold text-acb">
                       Mới
                     </span>
                   )}

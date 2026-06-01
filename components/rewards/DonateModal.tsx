@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useEco } from "@/context/EcoProvider";
+import { Icon } from "@/components/ui/Icon";
 
 const OPTIONS = [
   { points: 30, trees: 1, label: "30 điểm" },
@@ -26,7 +27,7 @@ export function DonateModal({
       return;
     }
     donatePoints(points);
-    setMessage(`🌳 Đã quyên góp trồng ${trees} cây thật!`);
+    setMessage(`Đã quyên góp trồng ${trees} cây thật!`);
     setTimeout(() => {
       setMessage(null);
       onClose();
@@ -37,13 +38,18 @@ export function DonateModal({
     <>
       <div className="fixed inset-0 z-40 bg-black/40" onClick={onClose} />
       <div className="fixed inset-x-4 bottom-24 z-50 mx-auto max-w-[360px] rounded-2xl bg-white p-5 shadow-2xl">
-        <h2 className="text-base font-bold text-slate-800">Trồng cây thật</h2>
+        <h2 className="flex items-center gap-2 text-base font-bold text-slate-800">
+          <span className="flex h-8 w-8 items-center justify-center rounded-full bg-green-50 text-acb-green">
+            <Icon name="tree" className="h-5 w-5" />
+          </span>
+          Trồng cây thật
+        </h2>
         <p className="mt-1 text-xs text-slate-500">
           Đổi điểm xanh hỗ trợ dự án GreenVN × ACB
         </p>
         <p className="mt-2 text-sm">
           Điểm khả dụng:{" "}
-          <strong className="text-[#2E7D32]">{availableGreenPoints}</strong>
+          <strong className="text-acb-green">{availableGreenPoints}</strong>
         </p>
         {message && (
           <p className="mt-2 rounded-lg bg-green-50 p-2 text-center text-xs text-green-800">

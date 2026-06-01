@@ -1,10 +1,19 @@
 @import "tailwindcss";
 
 :root {
-  --acb-blue: #0066b3;
-  --acb-green: #2e7d32;
-  --background: #f5f7fa;
+  --background: #f4f7fb;
   --foreground: #1e293b;
+}
+
+/* Brand design tokens — sinh ra các tiện ích bg-acb, text-acb, ring-acb... */
+@theme {
+  --color-acb: #0066b3;
+  --color-acb-dark: #004d8c;
+  --color-acb-light: #1a86e0;
+  --color-acb-tint: #eaf4ff;
+  --color-acb-green: #2e7d32;
+  --color-acb-green-dark: #1b5e20;
+  --color-acb-lime: #c8f56a;
 }
 
 @theme inline {

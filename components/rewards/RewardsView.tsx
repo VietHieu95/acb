@@ -5,6 +5,7 @@ import { useEco } from "@/context/EcoProvider";
 import { STAGE_LABELS } from "@/lib/forest/score";
 import { RewardCard } from "./RewardCard";
 import { DonateModal } from "./DonateModal";
+import { Icon } from "@/components/ui/Icon";
 
 export function RewardsView() {
   const { availableGreenPoints, greenScore, treeStage, ecoState } = useEco();
@@ -12,7 +13,7 @@ export function RewardsView() {
 
   return (
     <div className="space-y-4 p-4 pb-8">
-      <section className="rounded-2xl bg-gradient-to-br from-[#0066B3] to-[#004d8c] p-4 text-white">
+      <section className="rounded-2xl bg-gradient-to-br from-acb to-acb-dark p-4 text-white">
         <p className="text-xs opacity-80">Điểm rừng tích lũy</p>
         <p className="text-3xl font-bold">{greenScore}</p>
         <p className="mt-1 text-xs opacity-90">
@@ -46,9 +47,10 @@ export function RewardsView() {
       <button
         type="button"
         onClick={() => setDonateOpen(true)}
-        className="w-full rounded-xl bg-[#2E7D32] py-3.5 text-sm font-bold text-white shadow-lg shadow-green-200 hover:bg-[#1B5E20]"
+        className="flex w-full items-center justify-center gap-2 rounded-xl bg-acb-green py-3.5 text-sm font-bold text-white shadow-lg shadow-green-200 hover:bg-acb-green-dark"
       >
-        🌳 Quyên góp trồng cây thật
+        <Icon name="tree" className="h-5 w-5" />
+        Quyên góp trồng cây thật
       </button>
 
       <p className="text-center text-[10px] text-slate-400">

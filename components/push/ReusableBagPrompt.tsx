@@ -3,6 +3,7 @@
 import { useState } from "react";
 import { useEco } from "@/context/EcoProvider";
 import { BAG_CO2_REDUCTION_KG, BAG_GREEN_POINTS } from "@/lib/carbon/calculator";
+import { Icon } from "@/components/ui/Icon";
 
 export function ReusableBagPrompt() {
   const { showBagPrompt, answerBagPrompt } = useEco();
@@ -41,11 +42,11 @@ export function ReusableBagPrompt() {
         aria-labelledby="bag-prompt-title"
       >
         <div className="mb-3 flex items-center gap-2">
-          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 text-xl">
-            🛍️
+          <span className="flex h-10 w-10 items-center justify-center rounded-full bg-green-100 text-acb-green">
+            <Icon name="bag" className="h-5 w-5" />
           </span>
           <div>
-            <p className="text-[10px] font-semibold uppercase tracking-wide text-[#0066B3]">
+            <p className="text-[10px] font-semibold uppercase tracking-wide text-acb">
               Thông báo Eco-Tracker
             </p>
             <h2 id="bag-prompt-title" className="text-sm font-bold text-slate-800">
