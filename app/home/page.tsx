@@ -13,7 +13,7 @@ export default function HomePage() {
         <section className="mx-4 mt-4 rounded-2xl bg-acb-tint p-3 ring-1 ring-blue-100">
           <p className="text-[10px] font-semibold uppercase text-acb">Nguồn phương pháp</p>
           <p className="mt-1 text-[10px] leading-relaxed text-slate-600">
-            Dựa trên GHG Protocol Scope 3 và hệ số activity-based từ EPA/IPCC, UK GHG Factors, ICAO, IEA cho xe điện, giao thông công cộng, hàng không, xăng dầu.
+            Hệ số phát thải theo ngành (spend-based) từ mô hình EPA USEEIO — kg CO2e/USD, quy đổi sang VNĐ theo tỷ giá 26.000đ/USD. Phân loại ngành dựa trên mã MCC của giao dịch.
           </p>
         </section>
       </div>

@@ -1,4 +1,5 @@
 import type { SpendCategory } from "../types";
+import { efPerMillionVnd, getFactor, VND_PER_USD } from "./useeio-ef";
 
 export type CarbonMethod = "spend-intensity" | "activity-check";
 export type CarbonConfidence = "high" | "medium" | "low";
@@ -24,31 +25,6 @@ interface ProfileInput {
 }
 
 const VND_PER_MILLION = 1_000_000;
-const FUEL_PRICE_VND_PER_LITER = 23_000;
-const GASOLINE_KG_CO2_PER_LITER = 2.319;
-const VN_GRID_KG_CO2E_PER_KWH = 0.6766;
-const VN_ELECTRICITY_PRICE_VND_PER_KWH = 2_250;
-const EV_KWH_PER_KM = 0.16;
-const EV_RIDE_PRICE_VND_PER_KM = 14_000;
-const ICE_RIDE_KG_CO2E_PER_KM = 0.185;
-const ICE_RIDE_PRICE_VND_PER_KM = 12_500;
-
-const EDUCATIONAL_INTENSITIES: Record<string, number> = {
-  electricity: 300,
-  fuel: 100,
-  flight: 38.5,
-  grocery: 30,
-  restaurant: 10.5,
-  apparel: 7.5,
-  telecom: 5,
-  electricRide: 2,
-  busRail: 3,
-};
-
-function includesAny(value: string, keywords: string[]): boolean {
-  const normalized = value.toLowerCase().normalize("NFD");
-  return keywords.some((keyword) => normalized.includes(keyword));
-}
 
 /** Cắt nhiễu dấu phẩy động (IEEE) nhưng KHÔNG làm tròn số liệu: giữ tối đa 6 chữ số thập phân thực. */
 function trimNum(value: number, maxDecimals = 6): string {
@@ -59,217 +35,153 @@ function amountMillions(amountVnd: number): number {
   return amountVnd / VND_PER_MILLION;
 }
 
-function profile(input: Omit<CarbonProfile, "co2eKg"> & { amountVnd: number }): CarbonProfile {
-  return {
-    ...input,
-    // Giữ giá trị thực: số tiền (triệu VND) × hệ số EF, chỉ cắt nhiễu float ở 6 chữ số.
-    co2eKg: parseFloat(
-      (amountMillions(input.amountVnd) * input.intensityKgPerMillionVnd).toFixed(6),
-    ),
-  };
+/** Bỏ dấu tiếng Việt để so khớp từ khoá ổn định hơn. */
+function normalize(value: string): string {
+  return value
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[̀-ͯ]/g, "")
+    .replace(/đ/g, "d");
 }
 
-function spendProfile({
-  id,
-  tag,
-  amountVnd,
-  intensity,
-  sourceLabel,
-  sourceRefs,
-  assumptionText,
-  confidence,
-}: {
-  id: string;
+function hasAny(value: string, keywords: string[]): boolean {
+  return keywords.some((k) => value.includes(k));
+}
+
+interface Mapping {
+  code: string;
   tag: string;
-  amountVnd: number;
-  intensity: number;
-  sourceLabel: string;
-  sourceRefs: string[];
-  assumptionText: string;
   confidence: CarbonConfidence;
-}): CarbonProfile {
-  return profile({
-    id,
-    method: "spend-intensity",
-    tag,
-    amountVnd,
-    intensityKgPerMillionVnd: intensity,
-    formulaText: `${trimNum(amountMillions(amountVnd))} triệu VND × ${intensity} kg CO2e/triệu VND`,
-    assumptionText,
-    sourceLabel,
-    sourceRefs,
-    confidence,
-  });
+}
+
+/** Map merchant / MCC / category → mã ngành USEEIO. */
+function mapToIndustry({ merchant, mcc, category }: ProfileInput): Mapping {
+  const m = normalize(merchant);
+
+  // Điện / nước / khí đốt
+  if (mcc === 4900 || hasAny(m, ["evn", "dien luc", "hoa don dien", "tien dien"]))
+    return { code: "22", tag: "Điện / nước / khí đốt", confidence: "high" };
+
+  // Xăng dầu
+  if (mcc === 5541 || mcc === 5542 || hasAny(m, ["shell", "petrolimex", "xang", "petrol", "fuel"]))
+    return { code: "324", tag: "Xăng dầu", confidence: "high" };
+
+  // Hàng không
+  if ((mcc >= 3000 && mcc <= 3299) || hasAny(m, ["airline", "airways", "hang khong", "flight", "vietjet", "bamboo"]))
+    return { code: "481", tag: "Hàng không", confidence: "high" };
+
+  // Đường sắt / metro
+  if (hasAny(m, ["duong sat", "railway", "tau hoa", "train", "se1", "metro"]))
+    return { code: "482", tag: "Đường sắt", confidence: "high" };
+
+  // Đường thuỷ
+  if (hasAny(m, ["pha ", "ferry", "tau thuy", "ship", "boat", "ca no"]))
+    return { code: "483", tag: "Đường thuỷ", confidence: "medium" };
+
+  // Giao thông đường bộ (bus, taxi, xe công nghệ)
+  if (
+    mcc === 4111 || mcc === 4121 || mcc === 4131 ||
+    hasAny(m, ["vinbus", "bus", "buyt", "taxi", "grab", "xanh sm", "gojek", "be ", "chuyen xe", "xe "])
+  )
+    return { code: "485", tag: "Giao thông đường bộ", confidence: "high" };
+
+  // Cửa hàng thực phẩm / siêu thị
+  if (
+    mcc === 5411 || mcc === 5422 || mcc === 5441 || mcc === 5451 || mcc === 5462 || mcc === 5499 ||
+    hasAny(m, ["coopmart", "co.opmart", "lotte", "circle k", "mart", "sieu thi", "winmart", "bach hoa", "grocery"])
+  )
+    return { code: "445", tag: "Cửa hàng thực phẩm", confidence: "high" };
+
+  // Nhà hàng / F&B
+  if (
+    mcc === 5811 || mcc === 5812 || mcc === 5813 || mcc === 5814 ||
+    hasAny(m, ["highlands", "coffee", "cafe", "ca phe", "mcdonald", "kfc", "lotteria", "restaurant", "nha hang", "starbucks", "phuc long", "tra sua", "quan "])
+  )
+    return { code: "722", tag: "Nhà hàng / F&B", confidence: "high" };
+
+  // Mỹ phẩm / hàng tiêu dùng cá nhân
+  if (hasAny(m, ["body shop", "cosmetic", "my pham", "beauty", "guardian", "watsons"]))
+    return { code: "339", tag: "Mỹ phẩm / hàng cá nhân", confidence: "medium" };
+
+  // Xe & phụ tùng
+  if (
+    mcc === 5511 || mcc === 5521 || mcc === 5531 || mcc === 5532 || mcc === 5533 || mcc === 5571 ||
+    hasAny(m, ["vinfast", "o to", "xe may", "phu tung", "showroom", "motor"])
+  )
+    return { code: "441", tag: "Xe & phụ tùng", confidence: "medium" };
+
+  // Thời trang / may mặc
+  if (
+    mcc === 5611 || mcc === 5621 || mcc === 5631 || mcc === 5641 || mcc === 5651 || mcc === 5661 || mcc === 5691 ||
+    hasAny(m, ["mango", "fashion", "thoi trang", "uniqlo", "zara", "quan ao", "giay", "shoe"])
+  )
+    return { code: "315AL", tag: "Thời trang / may mặc", confidence: "medium" };
+
+  // Khách sạn / lưu trú
+  if (mcc === 7011 || mcc === 7012 || (mcc >= 3500 && mcc <= 3999) || hasAny(m, ["hotel", "resort", "khach san", "homestay", "camp"]))
+    return { code: "721", tag: "Khách sạn / lưu trú", confidence: "medium" };
+
+  // Viễn thông / dịch vụ số
+  if (
+    mcc === 4814 || mcc === 4816 || mcc === 4899 ||
+    hasAny(m, ["viettel", "mobifone", "vinaphone", "fpt", "internet", "telecom", "vien thong", "netflix", "spotify"])
+  )
+    return { code: "513", tag: "Viễn thông / số", confidence: "medium" };
+
+  // Điện tử / máy tính
+  if (mcc === 5045 || mcc === 5722 || mcc === 5732 || mcc === 5734 || hasAny(m, ["the gioi di dong", "fpt shop", "cellphones", "dien may", "laptop", "computer", "may tinh"]))
+    return { code: "334", tag: "Điện tử / máy tính", confidence: "medium" };
+
+  // Y tế / bệnh viện
+  if (mcc === 8011 || mcc === 8021 || mcc === 8062 || mcc === 8099 || hasAny(m, ["benh vien", "hospital", "clinic", "phong kham"]))
+    return { code: "622", tag: "Y tế", confidence: "medium" };
+
+  // Giáo dục
+  if (mcc === 8211 || mcc === 8220 || mcc === 8299 || hasAny(m, ["truong", "school", "university", "dai hoc", "hoc phi", "education"]))
+    return { code: "61", tag: "Giáo dục", confidence: "medium" };
+
+  // Giải trí / vui chơi
+  if (mcc === 7298 || mcc === 7832 || mcc === 7991 || mcc === 7996 || mcc === 7997 || hasAny(m, ["cinema", "cgv", "rap ", "karaoke", "gym", "spa", "cong vien"]))
+    return { code: "713", tag: "Giải trí / vui chơi", confidence: "medium" };
+
+  // Fallback theo nhóm chi tiêu
+  switch (category) {
+    case "transport":
+      return { code: "485", tag: "Giao thông đường bộ", confidence: "low" };
+    case "food":
+      return { code: "722", tag: "Nhà hàng / F&B", confidence: "low" };
+    case "shopping":
+      return { code: "452", tag: "Bán lẻ tổng hợp", confidence: "low" };
+    case "travel":
+      return { code: "487OS", tag: "Du lịch / lữ hành", confidence: "low" };
+    case "utilities":
+      return { code: "513", tag: "Tiện ích / viễn thông", confidence: "low" };
+    default:
+      return { code: "4A0", tag: "Bán lẻ khác", confidence: "low" };
+  }
 }
 
 export function resolveCarbonProfile(input: ProfileInput): CarbonProfile {
-  const { amountVnd, merchant, mcc, category } = input;
-  const lower = merchant.toLowerCase().normalize("NFD");
+  const { amountVnd } = input;
+  const mapping = mapToIndustry(input);
+  const factor = getFactor(mapping.code);
+  const intensity = efPerMillionVnd(mapping.code);
+  const millions = amountMillions(amountVnd);
+  const co2eKg = parseFloat((millions * intensity).toFixed(6));
 
-  if (includesAny(lower, ["shell", "petrolimex", "xang", "xăng", "petrol"]) || mcc === 5541 || mcc === 5542) {
-    const litersPerMillion = VND_PER_MILLION / FUEL_PRICE_VND_PER_LITER;
-    const directIntensity = litersPerMillion * GASOLINE_KG_CO2_PER_LITER;
-    return spendProfile({
-      id: "fuel-vn-adjusted",
-      tag: "Xăng dầu",
-      amountVnd,
-      intensity: Math.round(directIntensity),
-      sourceLabel: "EPA GHG Emission Factors Hub 2025 + giá xăng VN",
-      sourceRefs: [
-        "EPA Table 2: Motor Gasoline = 8.78 kg CO2/gallon = 2.319 kg CO2/liter",
-        "Giá xăng demo 23.000 VND/lít để quy đổi theo 1 triệu VND",
-      ],
-      assumptionText: `1 triệu VND mua khoảng ${litersPerMillion.toFixed(1)} lít xăng; EF = ${GASOLINE_KG_CO2_PER_LITER} kg CO2/lít.`,
-      confidence: "high",
-    });
-  }
-
-  if (includesAny(lower, ["xanh sm", "xanhsm", "green sm", "grab electric", "be green"])) {
-    const kwhPerMillion = (VND_PER_MILLION / EV_RIDE_PRICE_VND_PER_KM) * EV_KWH_PER_KM;
-    const directIntensity = kwhPerMillion * VN_GRID_KG_CO2E_PER_KWH;
-    return spendProfile({
-      id: "electric-ride-vn-grid",
-      tag: "Taxi/xe công nghệ điện",
-      amountVnd,
-      intensity: Math.max(1, Math.round(directIntensity)),
-      sourceLabel: "Green SM official + hệ số điện lưới VN + IEA EV Outlook",
-      sourceRefs: [
-        "Green SM official website: pure-electric mobility service",
-        "Vietnam grid EF assumption 0.6766 kg CO2e/kWh",
-        "IEA Global EV Outlook: EV has no tailpipe emissions but grid electricity matters",
-      ],
-      assumptionText: `Xe điện demo dùng ${EV_KWH_PER_KM} kWh/km, giá ${EV_RIDE_PRICE_VND_PER_KM.toLocaleString("vi-VN")} VND/km, lưới điện VN ${VN_GRID_KG_CO2E_PER_KWH} kg CO2e/kWh.`,
-      confidence: "medium",
-    });
-  }
-
-  if (includesAny(lower, ["grab", "taxi", "chuyen xe", "chuyến xe"]) || mcc === 4121) {
-    const kmPerMillion = VND_PER_MILLION / ICE_RIDE_PRICE_VND_PER_KM;
-    const directIntensity = kmPerMillion * ICE_RIDE_KG_CO2E_PER_KM;
-    return spendProfile({
-      id: "ride-hailing-ice",
-      tag: "Xe công nghệ dùng xăng",
-      amountVnd,
-      intensity: Math.round(directIntensity),
-      sourceLabel: "EPA GHG Emission Factors Hub 2025 Table 10",
-      sourceRefs: [
-        "EPA Table 10: Passenger Car = 0.297 kg CO2/vehicle-mile = 0.185 kg CO2/km",
-      ],
-      assumptionText: `Taxi/Grab thường demo dùng ${ICE_RIDE_PRICE_VND_PER_KM.toLocaleString("vi-VN")} VND/km và EF xe con ${ICE_RIDE_KG_CO2E_PER_KM} kg CO2/km.`,
-      confidence: "medium",
-    });
-  }
-
-  if (includesAny(lower, ["vinbus", "xe buyt dien", "xe buýt điện", "duong sat", "đường sắt", "vietnam railway", "tau hoa", "tàu hỏa"]) || mcc === 4111 || mcc === 4131) {
-    return spendProfile({
-      id: "bus-rail-low-carbon",
-      tag: includesAny(lower, ["vinbus", "xe buyt dien", "xe buýt điện"]) ? "Xe buýt điện" : "Bus/tàu",
-      amountVnd,
-      intensity: EDUCATIONAL_INTENSITIES.busRail,
-      sourceLabel: "EPA Table 10 + VinBus/rail low-carbon adjustment",
-      sourceRefs: [
-        "EPA Table 10: Bus = 0.066 kg CO2/passenger-mile; rail factors also reported by passenger-mile",
-        "VinBus official website for electric bus classification",
-      ],
-      assumptionText: "Game hoá nhóm bus/tàu ở mức rất thấp để khuyến khích thay thế xe cá nhân/xăng dầu.",
-      confidence: "medium",
-    });
-  }
-
-  if (includesAny(lower, ["vietnam airlines", "airlines", "flight"]) || (mcc >= 3000 && mcc <= 3299)) {
-    return spendProfile({
-      id: "air-travel-education",
-      tag: "Hàng không",
-      amountVnd,
-      intensity: EDUCATIONAL_INTENSITIES.flight,
-      sourceLabel: "EPA Table 10 / ICAO Carbon Emissions Calculator",
-      sourceRefs: [
-        "EPA Table 10: Air travel factors by passenger-mile",
-        "ICAO Carbon Emissions Calculator methodology",
-      ],
-      assumptionText: "Giữ hệ số theo 1 triệu VND để so sánh hành vi chi tiêu; không dùng làm carbon audit từng chuyến bay.",
-      confidence: "medium",
-    });
-  }
-
-  if (mcc === 4900 || includesAny(lower, ["evn", "electric", "dien luc", "điện lực", "hoa don dien", "hóa đơn điện"])) {
-    const kwhPerMillion = VND_PER_MILLION / VN_ELECTRICITY_PRICE_VND_PER_KWH;
-    const directIntensity = kwhPerMillion * VN_GRID_KG_CO2E_PER_KWH;
-    return spendProfile({
-      id: "electricity-vn-grid",
-      tag: "Điện sinh hoạt",
-      amountVnd,
-      intensity: Math.round(directIntensity),
-      sourceLabel: "Hệ số điện lưới Việt Nam + giá điện demo",
-      sourceRefs: [
-        "Vietnam grid EF assumption 0.6766 kg CO2e/kWh",
-        "Giá điện demo 2.250 VND/kWh để quy đổi theo 1 triệu VND",
-      ],
-      assumptionText: `1 triệu VND tiền điện ≈ ${kwhPerMillion.toFixed(0)} kWh × ${VN_GRID_KG_CO2E_PER_KWH} kg CO2e/kWh.`,
-      confidence: "medium",
-    });
-  }
-
-  if (mcc === 5411 || includesAny(lower, ["coopmart", "lotte mart", "circle k"])) {
-    return spendProfile({
-      id: "grocery-education",
-      tag: "Siêu thị",
-      amountVnd,
-      intensity: EDUCATIONAL_INTENSITIES.grocery,
-      sourceLabel: "EPA USEEIO-style educational benchmark",
-      sourceRefs: ["Educational spend-intensity benchmark for B2C gameplay"],
-      assumptionText: "Hệ số tham khảo để so sánh hành vi chi tiêu; không đại diện cho từng sản phẩm trong giỏ hàng.",
-      confidence: "low",
-    });
-  }
-
-  if (mcc === 5812 || mcc === 5814 || includesAny(lower, ["highlands", "mcdonald", "restaurant", "coffee"])) {
-    return spendProfile({
-      id: "restaurant-education",
-      tag: "F&B / nhà hàng",
-      amountVnd,
-      intensity: EDUCATIONAL_INTENSITIES.restaurant,
-      sourceLabel: "EPA USEEIO-style educational benchmark",
-      sourceRefs: ["Educational spend-intensity benchmark for B2C gameplay"],
-      assumptionText: "Hệ số tham khảo cho game hoá; muốn chính xác cần dữ liệu món ăn/nguyên liệu/khối lượng.",
-      confidence: "low",
-    });
-  }
-
-  if (mcc === 5691 || includesAny(lower, ["mango", "the body shop", "fashion", "vinfast"])) {
-    return spendProfile({
-      id: "apparel-retail-education",
-      tag: "Thời trang/retail",
-      amountVnd,
-      intensity: EDUCATIONAL_INTENSITIES.apparel,
-      sourceLabel: "EPA USEEIO-style educational benchmark",
-      sourceRefs: ["Educational spend-intensity benchmark for B2C gameplay"],
-      assumptionText: "Hệ số tham khảo theo chi tiêu để giáo dục; không chứng nhận sản phẩm xanh hay footprint từng món hàng.",
-      confidence: "low",
-    });
-  }
-
-  if (category === "utilities") {
-    return spendProfile({
-      id: "telecom-utilities-education",
-      tag: "Viễn thông/tiện ích số",
-      amountVnd,
-      intensity: EDUCATIONAL_INTENSITIES.telecom,
-      sourceLabel: "Educational benchmark for low-carbon digital utilities",
-      sourceRefs: ["Educational spend-intensity benchmark for B2C gameplay"],
-      assumptionText: "Hệ số thấp để phản ánh dịch vụ số/viễn thông có footprint trực tiếp thấp hơn điện/xăng.",
-      confidence: "low",
-    });
-  }
-
-  return spendProfile({
-    id: "other-education",
-    tag: "Chi tiêu khác",
-    amountVnd,
-    intensity: 20,
-    sourceLabel: "Educational benchmark",
-    sourceRefs: ["Fallback educational spend-intensity benchmark"],
-    assumptionText: "Không có profile riêng nên dùng benchmark trung tính cho mục đích game hoá.",
-    confidence: "low",
-  });
+  return {
+    id: `useeio-${mapping.code}`,
+    method: "spend-intensity",
+    tag: mapping.tag,
+    co2eKg,
+    intensityKgPerMillionVnd: intensity,
+    formulaText: `${trimNum(millions)} triệu VND × ${trimNum(intensity)} kg CO2e/triệu VND`,
+    assumptionText: `Ngành USEEIO ${factor.code} = ${factor.kgCo2ePerUsd} kg CO2e/USD; quy đổi theo tỷ giá ${VND_PER_USD.toLocaleString("vi-VN")}đ/USD ⇒ ${trimNum(intensity)} kg CO2e/triệu VND.`,
+    sourceLabel: "EPA USEEIO — hệ số phát thải theo ngành (spend-based)",
+    sourceRefs: [
+      `USEEIO ${factor.code} — ${factor.nameEn}: ${factor.kgCo2ePerUsd} kg CO2e/USD`,
+      `Quy đổi: × 1.000.000 ÷ ${VND_PER_USD.toLocaleString("vi-VN")} VND/USD`,
+    ],
+    confidence: mapping.confidence,
+  };
 }

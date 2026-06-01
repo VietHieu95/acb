@@ -15,7 +15,7 @@ export function CarbonSummary() {
       <div className="flex items-start justify-between gap-3">
         <div>
           <h3 className="text-sm font-bold text-slate-800">Dấu chân carbon tháng này</h3>
-          <p className="text-xs text-slate-500">Giáo dục: kg CO2e / 1 triệu VND</p>
+          <p className="text-xs text-slate-500">Theo chi tiêu: kg CO2e / 1 triệu VND</p>
         </div>
         <div className="shrink-0 text-right">
           <p className="text-xl font-bold text-slate-900">{formatCo2(totalCo2)}</p>
@@ -26,10 +26,10 @@ export function CarbonSummary() {
       <div className="mt-3 rounded-xl bg-slate-50 p-3 ring-1 ring-slate-100">
         <p className="text-[10px] font-semibold uppercase text-slate-500">Công thức demo</p>
         <p className="mt-1 font-mono text-[10px] text-slate-700">
-CO2e = (VNĐ / 1.000.000) × EF giáo dục
+CO2e = (VNĐ / 1.000.000) × EF ngành (USEEIO)
         </p>
         <p className="mt-1 text-[10px] leading-relaxed text-slate-500">
-EF dùng để so sánh tương đối lối sống: điện/xăng cao, bus/tàu thấp, shopping/F&B ở mức tham khảo.
+Hệ số phát thải theo ngành của EPA USEEIO (kg CO2e/USD), quy đổi sang VNĐ theo tỷ giá 26.000đ/USD.
         </p>
       </div>
 
